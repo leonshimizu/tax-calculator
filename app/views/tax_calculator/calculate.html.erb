@@ -6,6 +6,10 @@
     <%= form.text_field :gross_income %>
   </div>
   <div>
+    <%= form.label :filing_status, "Select Filing Status:" %>
+    <%= form.select :filing_status, options_for_select([['Single', 'single'], ['Married Filing Separately', 'single'], ['Married Filing Jointly', 'married_filing_jointly'], ['Head of Household', 'head_of_household']], selected: params[:filing_status]) %>
+  </div>
+  <div>
     <%= form.submit "Calculate" %>
   </div>
 <% end %>

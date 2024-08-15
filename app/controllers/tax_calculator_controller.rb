@@ -1,13 +1,13 @@
+# app/controllers/tax_calculator_controller.rb
 class TaxCalculatorController < ApplicationController
   def calculate
-    # Assign gross_income from the params
     @gross_income = params[:gross_income].to_f
-    # Calculate withholding tax
-    @withholding_tax = WithholdingTaxCalculator.calculate(@gross_income)
+    @filing_status = params[:filing_status] || 'single'
+    @withholding_tax = WithholdingTaxCalculator.calculate(@gross_income, @filing_status)
 
     respond_to do |format|
-      format.html # renders the default HTML view
-      format.json { render json: { gross_income: @gross_income, withholding_tax: @withholding_tax } }
+      format.html
+      format.json { render json: { gross_income: @gross_income, filing_status: @filing_status, withholding_tax: @withholding_tax } }
     end
   end
 end

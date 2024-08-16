@@ -10,16 +10,20 @@
     <%= form.number_field :pay_rate, step: :any %>
   </div>
   <div>
-    <%= form.label :filing_status, "Filing Status:" %>
-    <%= form.select :filing_status, options_for_select(['single', 'married_filing_jointly', 'head_of_household'], selected: params[:filing_status]) %>
+    <%= form.label :reported_tips, "Cash Tips Received:" %>
+    <%= form.number_field :reported_tips, step: :any %>
   </div>
   <div>
     <%= form.label :loan, "Loan Deduction:" %>
     <%= form.number_field :loan, step: :any %>
   </div>
   <div>
-    <%= form.label :reported_tips, "Cash Tips Received:" %>
-    <%= form.number_field :reported_tips, step: :any %>
+    <%= form.label :retirement_rate, "401K Rate:" %>
+    <%= form.number_field :retirement_rate, step: :any %>
+  </div>
+  <div>
+    <%= form.label :filing_status, "Filing Status:" %>
+    <%= form.select :filing_status, options_for_select(['single', 'married_filing_jointly', 'head_of_household'], selected: params[:filing_status]) %>
   </div>
   <div>
     <%= form.submit "Calculate Net Pay", name: 'calculate' %>
@@ -27,14 +31,15 @@
 <% end %>
 
 <% if @net_pay %>
-  <h2>Hours Worked: <%= @total_hours %></h2>
-  <h2>Pay Rate: <%= number_to_currency(@pay_rate) %> / hour</h2>
-  <h2>Gross Income: <%= number_to_currency(@gross_income) %></h2>
-  <h2>Loan: <%= number_to_currency(@loan) %></h2>
-  <h2>Reported Tips: <%= number_to_currency(@reported_tips) %></h2>
-  <h2>Withholding Tax: <%= number_to_currency(@withholding_tax) %></h2>
-  <h2>Social Security Tax: <%= number_to_currency(@social_security_tax) %></h2>
-  <h2>Medicare Tax: <%= number_to_currency(@medicare_tax) %></h2>
-  <h2>Filing Status: <%= @filing_status.capitalize %></h2>
+  <h3>Hours Worked: <%= @total_hours %></h3>
+  <h3>Pay Rate: <%= number_to_currency(@pay_rate) %> / hour</h3>
+  <h3>Gross Income: <%= number_to_currency(@gross_income) %></h3>
+  <h3>Loan: <%= number_to_currency(@loan) %></h3>
+  <h3>Reported Tips: <%= number_to_currency(@reported_tips) %></h3>
+  <h3>Withholding Tax: <%= number_to_currency(@withholding_tax) %></h3>
+  <h3>Social Security Tax: <%= number_to_currency(@social_security_tax) %></h3>
+  <h3>Medicare Tax: <%= number_to_currency(@medicare_tax) %></h3>
+  <h3>Retirement Amount: <%= number_to_currency(@retirement_amount) %></h3>
+  <h3>Filing Status: <%= @filing_status.capitalize %></h3>
   <h1>Net Pay: <%= number_to_currency(@net_pay) %></h1>
 <% end %>

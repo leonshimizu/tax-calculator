@@ -22,6 +22,10 @@
     <%= form.number_field :retirement_rate, step: :any %>
   </div>
   <div>
+    <%= form.label :insurance, "Insurance:" %>
+    <%= form.number_field :insurance, step: :any %>
+  </div>
+  <div>
     <%= form.label :filing_status, "Filing Status:" %>
     <%= form.select :filing_status, options_for_select(['single', 'married_filing_jointly', 'head_of_household'], selected: params[:filing_status]) %>
   </div>

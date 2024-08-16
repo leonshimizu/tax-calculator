@@ -10,8 +10,8 @@
     <%= form.number_field :overtime_hours, step: :any %>
   </div>
   <div>
-    <%= form.label :pay_rate, "Pay Rate:" %>
-    <%= form.number_field :pay_rate, step: :any %>
+    <%= form.label :regular_pay_rate, "Pay Rate:" %>
+    <%= form.number_field :regular_pay_rate, step: :any %>
   </div>
   <div>
     <%= form.label :reported_tips, "Reported Tips:" %>
@@ -39,13 +39,15 @@
 <% end %>
 
 <% if @net_pay %>
-  <h3>Hours Worked: <%= @regular_hours %></h3>
-  <h3>Pay Rate: <%= number_to_currency(@pay_rate) %> / hour</h3>
+  <h3>Regular Hours Worked: <%= @regular_hours %></h3>
+  <h3>Regular Pay Rate: <%= number_to_currency(@regular_pay_rate) %> / hour</h3>
+  <h3>Regular Pay: <%= number_to_currency(@regular_pay) %></h3>
   <h3>Overtime Hours Worked: <%= @overtime_hours %></h3>
   <h3>Overtime Pay Rate: <%= number_to_currency(@overtime_rate) %> / hour</h3>
+  <h3>Overtime Pay: <%= number_to_currency(@overtime_pay) %></h3>
+  <h3>Reported Tips: <%= number_to_currency(@reported_tips) %></h3>
   <h3>Gross Income: <%= number_to_currency(@gross_income) %></h3>
   <h3>Loan: <%= number_to_currency(@loan) %></h3>
-  <h3>Reported Tips: <%= number_to_currency(@reported_tips) %></h3>
   <h3>Withholding Tax: <%= number_to_currency(@withholding_tax) %></h3>
   <h3>Social Security Tax: <%= number_to_currency(@social_security_tax) %></h3>
   <h3>Medicare Tax: <%= number_to_currency(@medicare_tax) %></h3>

@@ -2,8 +2,12 @@
 
 <%= form_with url: payroll_show_path, method: :get, local: true do |form| %>
   <div>
-    <%= form.label :total_hours, "Total Hours Worked:" %>
-    <%= form.number_field :total_hours, step: :any %>
+    <%= form.label :regular_hours, "Regular Hours Worked:" %>
+    <%= form.number_field :regular_hours, step: :any %>
+  </div>
+  <div>
+    <%= form.label :overtime_hours, "Overtime Hours Worked:" %>
+    <%= form.number_field :overtime_hours, step: :any %>
   </div>
   <div>
     <%= form.label :pay_rate, "Pay Rate:" %>
@@ -35,15 +39,18 @@
 <% end %>
 
 <% if @net_pay %>
-  <h3>Hours Worked: <%= @total_hours %></h3>
+  <h3>Hours Worked: <%= @regular_hours %></h3>
   <h3>Pay Rate: <%= number_to_currency(@pay_rate) %> / hour</h3>
+  <h3>Overtime Hours Worked: <%= @overtime_hours %></h3>
+  <h3>Overtime Pay Rate: <%= number_to_currency(@overtime_rate) %> / hour</h3>
   <h3>Gross Income: <%= number_to_currency(@gross_income) %></h3>
   <h3>Loan: <%= number_to_currency(@loan) %></h3>
   <h3>Reported Tips: <%= number_to_currency(@reported_tips) %></h3>
   <h3>Withholding Tax: <%= number_to_currency(@withholding_tax) %></h3>
   <h3>Social Security Tax: <%= number_to_currency(@social_security_tax) %></h3>
   <h3>Medicare Tax: <%= number_to_currency(@medicare_tax) %></h3>
-  <h3>Retirement Amount: <%= number_to_currency(@retirement_amount) %></h3>
+  <h3>Retirement: <%= number_to_currency(@retirement_amount) %></h3>
+  <h3>Insurance: <%= number_to_currency(@insurance) %></h3>
   <h3>Filing Status: <%= @filing_status.capitalize %></h3>
   <h1>Net Pay: <%= number_to_currency(@net_pay) %></h1>
 <% end %>

@@ -1,5 +1,5 @@
-# app/services/withholding_tax_calculator.rb
-class WithholdingTaxCalculator
+# app/services/calculator.rb
+class Calculator 
   TAX_TABLES = {
     single: [
       { min_income: 0, max_income: 561.99, base_tax: 0.00, rate: 0.00, threshold: 0 },
@@ -33,7 +33,7 @@ class WithholdingTaxCalculator
     ]
   }
 
-  def self.calculate(gross_income, filing_status)
+  def self.calculate_withholding(gross_income, filing_status)
     # Select the tax table based on the filing status
     tax_table = TAX_TABLES[filing_status.to_sym]
 
@@ -49,5 +49,15 @@ class WithholdingTaxCalculator
     else
       0.00
     end
+  end
+  
+  def self.calculate_social_security(gross_income)
+    tax = gross_income * 0.062
+    tax.round(2)
+  end
+  
+  def self.calculate_medicare(gross_income)
+    tax = gross_income * 0.0145
+    tax.round(2)
   end
 end

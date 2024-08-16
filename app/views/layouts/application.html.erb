@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>TaxCalculator</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
-
-  <body>
-    <%= yield %>
-  </body>
+<head>
+  <title>Leon's Payroll Application</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+</head>
+<body>
+  <header>
+    <%= link_to 'Tax Calculator', calculate_path, class: 'btn btn-primary' %> | 
+    <%= link_to 'Payroll', payroll_show_path, class: 'btn btn-primary' %>
+  </header>
+  <%= yield %>
+</body>
 </html>

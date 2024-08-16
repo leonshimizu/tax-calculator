@@ -20,8 +20,8 @@
 <% end %>
 
 <% if @withholding_tax %>
-  <h2>Gross Income: $<%= @gross_income %></h2>
-  <h2>Withholding Tax: $<%= @withholding_tax %></h2>
-  <h2>Social Security Tax: $<%= @social_security_tax %></h2>
-  <h2>Medicare Tax: $<%= @medicare_tax %></h2>
+  <h2>Gross Income: <%= number_to_currency(@gross_income) %></h2>
+  <h2>Withholding Tax: <%= number_to_currency(@withholding_tax) %></h2>
+  <h2>Social Security Tax: <%= number_to_currency(@social_security_tax) %></h2>
+  <h2>Medicare Tax: <%= number_to_currency(@medicare_tax) %></h2>
 <% end %>

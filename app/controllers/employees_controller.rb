@@ -7,24 +7,40 @@ class EmployeesController < ApplicationController
     @employee = Employee.find(params[:id])
   end
 
-  # incomplete - still need to add the data to what's created
   def new
     @employee = Employee.new
   end
 
-  # incomplete - still need to add the data to what's edited
+  def create
+    @employee = Employee.new(employee_params)
+    if @employee.save
+      redirect_to employee_path(@employee), notice: 'Employee was successfully created.'
+    else
+      render :new
+    end
+  end
+
   def edit
     @employee = Employee.find(params[:id])
+  end
+
+  def update
+    @employee = Employee.find(params[:id])
+    if @employee.update(employee_params)
+      redirect_to employee_path(@employee), notice: 'Employee was successfully updated.'
+    else
+      render :edit
+    end
   end
 
   def destroy
     @employee = Employee.find(params[:id])
     @employee.destroy
-    # redirect_to employees_url, notice: 'Employee was successfully destroyed.'
+    redirect_to employees_url, notice: 'Employee was successfully destroyed.'
   end
   
   private
   def employee_params
-    params.require(:employee).permit(:name, :filing_status, :pay_rate, :401k_rate, :position)
+    params.require(:employee).permit(:name, :filing_status, :pay_rate, :retirement_rate, :position)
   end
 end

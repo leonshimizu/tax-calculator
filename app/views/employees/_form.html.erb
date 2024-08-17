@@ -1,0 +1,43 @@
+<!-- app/views/employees/_form.html.erb -->
+<%= form_with(model: employee, local: true) do |form| %>
+  <% if employee.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(employee.errors.count, "error") %> prohibited this employee from being saved:</h2>
+
+      <ul>
+        <% employee.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name %><br>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :filing_status %><br>
+    <%= form.select :filing_status, ['single', 'married', 'head_of_household'] %>
+  </div>
+
+  <div>
+    <%= form.label :pay_rate %><br>
+    <%= form.number_field :pay_rate, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :retirement_rate, '401K Rate' %><br>
+    <%= form.number_field :retirement_rate, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :position %><br>
+    <%= form.select :position, ['front_of_house', 'back_of_house'] %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

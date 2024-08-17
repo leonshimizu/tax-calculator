@@ -4,12 +4,12 @@ one:
   name: MyString
   filing_status: MyString
   pay_rate: 9.99
-  401k_rate: 9.99
+  retirement_rate: 9.99
   position: MyString
 
 two:
   name: MyString
   filing_status: MyString
   pay_rate: 9.99
-  401k_rate: 9.99
+  retirement_rate: 9.99
   position: MyString

@@ -17,23 +17,56 @@
 /* Styles for Excel-like table borders */
 table {
   width: 25%;
-  border-collapse: collapse; /* Ensures borders between cells are doubled up into a single border */
-  margin-top: 20px; /* Adds space above the table */
-  background-color: #f9f9f9; /* Light grey background similar to Excel */
+  border-collapse: collapse;
+  /* Ensures borders between cells are doubled up into a single border */
+  margin-top: 20px;
+  /* Adds space above the table */
+  background-color: #f9f9f9;
+  /* Light grey background similar to Excel */
 }
 
-th, td {
-  border: 1px solid #cccccc; /* Light grey border for that Excel-like feel */
-  padding: 8px 10px; /* Padding inside cells */
-  text-align: left; /* Align text to the left */
+th,
+td {
+  border: 1px solid #cccccc;
+  /* Light grey border for that Excel-like feel */
+  padding: 8px 10px;
+  /* Padding inside cells */
+  text-align: left;
+  /* Align text to the left */
 }
 
 th {
-  background-color: #e9e9e9; /* Slightly darker shade for headers to stand out */
-  font-weight: bold; /* Make header text bold */
+  background-color: #e9e9e9;
+  /* Slightly darker shade for headers to stand out */
+  font-weight: bold;
+  /* Make header text bold */
 }
 
 .net-pay td {
   font-weight: bold;
-  color: #4CAF50; /* Green text for net pay to make it stand out */
+  color: #4CAF50;
+  /* Green text for net pay to make it stand out */
+}
+
+/* Employee index buttons */
+.btn {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  background-color: #007bff;
+  /* Bootstrap primary blue */
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  /* Bootstrap danger red */
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  /* Bootstrap secondary gray */
 }

@@ -1,0 +1,28 @@
+<!-- app/views/employees/show.html.erb -->
+<h1><%= @employee.name %></h1>
+
+<p>
+  <strong>Filing Status:</strong>
+  <%= @employee.filing_status %>
+</p>
+
+<p>
+  <strong>Pay Rate:</strong>
+  <%= number_to_currency(@employee.pay_rate) %>
+</p>
+
+<p>
+  <strong>Position:</strong>
+  <%= @employee.position %>
+</p>
+
+<h2>Payroll Records</h2>
+<%= link_to 'Add New Payroll Record', new_employee_payroll_record_path(@employee) %>
+<ul>
+  <% @employee.payroll_records.each do |record| %>
+    <li><%= link_to "Record dated #{record.date}", employee_payroll_record_path(@employee, record) %> - Processed</li>
+  <% end %>
+</ul>
+
+<%= link_to 'Edit', edit_employee_path(@employee) %> |
+<%= link_to 'Back to List', employees_path %>

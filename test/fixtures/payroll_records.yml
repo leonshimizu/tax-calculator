@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  hours_worked: 9.99
+  overtime_hours_worked: 9.99
+  reported_tips: 9.99
+  loan_payment: 9.99
+  insurance_payment: 9.99
+  date: 2024-08-18
+
+two:
+  employee: two
+  hours_worked: 9.99
+  overtime_hours_worked: 9.99
+  reported_tips: 9.99
+  loan_payment: 9.99
+  insurance_payment: 9.99
+  date: 2024-08-18

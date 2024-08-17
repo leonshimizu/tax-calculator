@@ -13,3 +13,27 @@
  *= require_tree .
  *= require_self
  */
+
+/* Styles for Excel-like table borders */
+table {
+  width: 25%;
+  border-collapse: collapse; /* Ensures borders between cells are doubled up into a single border */
+  margin-top: 20px; /* Adds space above the table */
+  background-color: #f9f9f9; /* Light grey background similar to Excel */
+}
+
+th, td {
+  border: 1px solid #cccccc; /* Light grey border for that Excel-like feel */
+  padding: 8px 10px; /* Padding inside cells */
+  text-align: left; /* Align text to the left */
+}
+
+th {
+  background-color: #e9e9e9; /* Slightly darker shade for headers to stand out */
+  font-weight: bold; /* Make header text bold */
+}
+
+.net-pay td {
+  font-weight: bold;
+  color: #4CAF50; /* Green text for net pay to make it stand out */
+}

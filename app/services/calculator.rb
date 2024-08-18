@@ -36,6 +36,7 @@ class Calculator
   def self.calculate_withholding(gross_pay, filing_status)
     # Select the tax table based on the filing status
     tax_table = TAX_TABLES[filing_status.to_sym]
+    raise "Unsupported filing status: #{filing_status}" unless tax_table
 
     # Find the applicable tax bracket
     bracket = tax_table.find do |row|

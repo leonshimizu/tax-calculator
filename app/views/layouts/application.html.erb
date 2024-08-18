@@ -8,8 +8,9 @@
 </head>
 <body>
   <header>
-    <%= link_to 'Payroll', payroll_show_path, class: 'btn btn-primary' %> | 
-    <%= link_to 'Tax Calculator', calculate_path, class: 'btn btn-primary' %>
+    <%= link_to 'Payroll', net_pay_show_path %> | 
+    <%= link_to 'Tax Calculator', calculate_path %> | 
+    <%= link_to 'Test Payroll Application', employees_path %>
   </header>
   <%= yield %>
 </body>

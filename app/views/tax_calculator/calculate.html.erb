@@ -2,8 +2,8 @@
 
 <%= form_with url: calculate_path, method: :get, local: true do |form| %>
   <div>
-    <%= form.label :gross_income, "Enter Gross Income:" %>
-    <%= form.text_field :gross_income %>
+    <%= form.label :gross_pay, "Enter Gross Income:" %>
+    <%= form.text_field :gross_pay %>
   </div>
   <div>
     <%= form.label :filing_status, "Select Filing Status:" %>
@@ -20,7 +20,7 @@
 <% end %>
 
 <% if @withholding_tax %>
-  <h2>Gross Income: <%= number_to_currency(@gross_income) %></h2>
+  <h2>Gross Income: <%= number_to_currency(@gross_pay) %></h2>
   <h2>Withholding Tax: <%= number_to_currency(@withholding_tax) %></h2>
   <h2>Social Security Tax: <%= number_to_currency(@social_security_tax) %></h2>
   <h2>Medicare Tax: <%= number_to_currency(@medicare_tax) %></h2>

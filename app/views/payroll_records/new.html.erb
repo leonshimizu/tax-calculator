@@ -1,0 +1,35 @@
+<%= form_with(model: [@employee, @payroll_record], local: true) do |form| %>
+  <div>
+    <%= form.label :hours_worked, "Hours Worked" %>
+    <%= form.number_field :hours_worked, step: 0.01, class: 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.label :overtime_hours_worked, "Overtime Hours Worked" %>
+    <%= form.number_field :overtime_hours_worked, step: 0.01, class: 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.label :reported_tips, "Reported Tips" %>
+    <%= form.number_field :reported_tips, step: 0.01, class: 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.label :loan_payment, "Loan Payment" %>
+    <%= form.number_field :loan_payment, step: 0.01, class: 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.label :insurance_payment, "Insurance Payment" %>
+    <%= form.number_field :insurance_payment, step: 0.01, class: 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.label :date, "Date" %>
+    <%= form.date_field :date, class: 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.submit "Create Payroll Record", class: 'btn btn-primary' %>
+  </div>
+<% end %>

@@ -1,0 +1,33 @@
+<!-- app/views/employees/show.html.erb -->
+<h1><%= @employee.name %></h1>
+
+<p>
+  <strong>Filing Status:</strong>
+  <%= @employee.filing_status.capitalize() %>
+</p>
+
+<p>
+  <strong>Pay Rate:</strong>
+  <%= number_to_currency(@employee.pay_rate) %> / hr
+</p>
+
+<p>
+  <strong>401K Rate:</strong>
+  <%= number_to_percentage(@employee.retirement_rate * 100, precision: 0) %>
+</p>
+
+<p>
+  <strong>Position:</strong>
+  <%= @employee.position.capitalize() %>
+</p>
+
+<h2>Payroll Records</h2>
+<%= link_to 'Add New Payroll Record', new_employee_payroll_record_path(@employee) %>
+<ul>
+  <% @employee.payroll_records.each do |record| %>
+    <li><%= link_to "Record dated #{record.date}", employee_payroll_record_path(@employee, record) %> - Processed</li>
+  <% end %>
+</ul>
+
+<%= link_to 'Edit', edit_employee_path(@employee) %> |
+<%= link_to 'Back to List', employees_path %>

@@ -1,4 +1,4 @@
-class PayrollController < ApplicationController
+class NetPayController < ApplicationController
   def show
     if params[:calculate]
       @regular_hours = params[:regular_hours].to_f || 0

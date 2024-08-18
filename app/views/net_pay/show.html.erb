@@ -1,6 +1,6 @@
 <h1>Calculate Net Pay</h1>
 
-<%= form_with url: payroll_show_path, method: :get, local: true do |form| %>
+<%= form_with url: net_pay_show_path, method: :get, local: true do |form| %>
   <div>
     <%= form.label :regular_hours, "Regular Hours Worked:" %>
     <%= form.number_field :regular_hours, step: :any %>

@@ -29,8 +29,8 @@
   </div>
 
   <div>
-    <%= form.label :retirement_rate %>
-    <%= form.number_field :retirement_rate %>
+    <%= form.label :retirement_rate, "Retirement Rate (%)" %>
+    <%= form.number_field :retirement_rate, step: 1, min: 0 %>
   </div>
 
   <div>

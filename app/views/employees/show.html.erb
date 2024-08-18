@@ -3,17 +3,22 @@
 
 <p>
   <strong>Filing Status:</strong>
-  <%= @employee.filing_status %>
+  <%= @employee.filing_status.capitalize() %>
 </p>
 
 <p>
   <strong>Pay Rate:</strong>
-  <%= number_to_currency(@employee.pay_rate) %>
+  <%= number_to_currency(@employee.pay_rate) %> / hr
+</p>
+
+<p>
+  <strong>401K Rate:</strong>
+  <%= number_to_percentage(@employee.retirement_rate * 100, precision: 0) %>
 </p>
 
 <p>
   <strong>Position:</strong>
-  <%= @employee.position %>
+  <%= @employee.position.capitalize() %>
 </p>
 
 <h2>Payroll Records</h2>

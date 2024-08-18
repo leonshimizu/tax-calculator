@@ -1,41 +1,45 @@
 <!-- app/views/employees/index.html.erb -->
 <h1>Employees</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Position</th>
-      <th>Pay Rate</th>
-      <th>401K Rate</th>
-      <th>Filing Status</th>
-      <th colspan="3">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @employees.each do |employee| %>
+<% if @employees.any? %>
+  <table>
+    <thead>
       <tr>
-        <td><%= employee.name %></td>
-        <td><%= employee.position.capitalize %></td>
-        <td><%= number_to_currency(employee.pay_rate) %> / hr</td>
-        <td>
-          <% if employee.retirement_rate %>
-            <%= number_to_percentage(employee.retirement_rate * 100, precision: 0) %>
-          <% else %>
-            N/A
-          <% end %>
-        </td>
-        <td><%= employee.filing_status.capitalize %></td>
-        <td><%= link_to 'Show', employee_path(employee), class: "btn btn-primary" %></td>
-        <td><%= link_to 'Edit', edit_employee_path(employee), class: "btn btn-secondary" %></td>
-        <td>
-          <%= form_with url: employee_path(employee), method: :delete, local: true do %>
-            <%= submit_tag 'Delete', class: "btn btn-danger" %>
-          <% end %>
-        </td>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Pay Rate</th>
+        <th>401K Rate</th>
+        <th>Filing Status</th>
+        <th colspan="3">Actions</th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @employees.each do |employee| %>
+        <tr>
+          <td><%= employee.name %></td>
+          <td><%= employee.position.capitalize %></td>
+          <td><%= number_to_currency(employee.pay_rate) %> / hr</td>
+          <td>
+            <% if employee.retirement_rate %>
+              <%= number_to_percentage(employee.retirement_rate * 100, precision: 0) %>
+            <% else %>
+              N/A
+            <% end %>
+          </td>
+          <td><%= employee.filing_status.capitalize %></td>
+          <td><%= link_to 'Show', employee_path(employee), class: "btn btn-primary" %></td>
+          <td><%= link_to 'Edit', edit_employee_path(employee), class: "btn btn-secondary" %></td>
+          <td>
+            <%= form_with url: employee_path(employee), method: :delete, local: true do %>
+              <%= submit_tag 'Delete', class: "btn btn-danger" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= link_to 'New Employee', new_employee_path %>
+<% else %>
+  <p>No employees found. <%= link_to 'Create one?', new_employee_path %></p>
+<% end %>
 
-<%= link_to 'New Employee', new_employee_path %>

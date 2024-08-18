@@ -11,7 +11,7 @@ class Calculator
       { min_income: 9936, max_income: 23997.99, base_tax: 2141.58, rate: 0.35, threshold: 9936 },
       { min_income: 23998, max_income: Float::INFINITY, base_tax: 7063.28, rate: 0.37, threshold: 23998 }
     ],
-    married_filing_jointly: [
+    married: [
       { min_income: 0, max_income: 1122.99, base_tax: 0.00, rate: 0.00, threshold: 0 },
       { min_income: 1123, max_income: 2014.99, base_tax: 0.00, rate: 0.10, threshold: 1123 },
       { min_income: 2015, max_income: 4749.99, base_tax: 89.20, rate: 0.12, threshold: 2015 },

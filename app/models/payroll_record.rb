@@ -31,9 +31,14 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_net_pay
-    # Calculate net pay after all deductions
-    total_deductions = self.withholding_tax + self.social_security_tax + self.medicare_tax + self.loan_payment + self.insurance_payment
-    self.net_pay = self.gross_pay - total_deductions
+    # Convert all potential nil values to 0.0 for safe calculations
+    total_deductions = (self.withholding_tax.to_f +
+                        self.social_security_tax.to_f +
+                        self.medicare_tax.to_f +
+                        self.loan_payment.to_f +
+                        self.insurance_payment.to_f)
+  
+    self.net_pay = self.gross_pay.to_f - total_deductions
   end
 
   def calculate_withholding

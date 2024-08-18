@@ -10,15 +10,8 @@ class PayrollRecord < ApplicationRecord
   before_save :update_payroll_details
 
   def calculate_gross_pay
-    # Calculate gross income based on hours worked, overtime, and tips
-    if self.overtime_hours_worked == nil
-      self.gross_pay = (self.hours_worked * employee.pay_rate) + 
-                          self.reported_tips
-    else
-      self.gross_pay = (self.hours_worked * employee.pay_rate) + 
-                          (self.overtime_hours_worked * employee.pay_rate * 1.5) + 
-                          self.reported_tips
-    end
+    overtime_pay = self.overtime_hours_worked.to_f * employee.pay_rate * 1.5
+    self.gross_pay = (self.hours_worked * employee.pay_rate) + overtime_pay + self.reported_tips.to_f
   end
 
   def update_payroll_details
@@ -31,12 +24,9 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_net_pay
-    # Convert all potential nil values to 0.0 for safe calculations
-    total_deductions = (self.withholding_tax.to_f +
-                        self.social_security_tax.to_f +
-                        self.medicare_tax.to_f +
-                        self.loan_payment.to_f +
-                        self.insurance_payment.to_f)
+    # Ensure all are converted to floats to handle nil values gracefully.
+    fields = [self.withholding_tax, self.social_security_tax, self.medicare_tax, self.loan_payment, self.insurance_payment]
+    total_deductions = fields.map(&:to_f).sum
   
     self.net_pay = self.gross_pay.to_f - total_deductions
   end

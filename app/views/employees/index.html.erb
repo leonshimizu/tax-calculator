@@ -18,7 +18,13 @@
         <td><%= employee.name %></td>
         <td><%= employee.position.capitalize %></td>
         <td><%= number_to_currency(employee.pay_rate) %> / hr</td>
-        <td><%= number_to_percentage(employee.retirement_rate * 100, precision: 0) %></td>
+        <td>
+          <% if employee.retirement_rate %>
+            <%= number_to_percentage(employee.retirement_rate * 100, precision: 0) %>
+          <% else %>
+            N/A
+          <% end %>
+        </td>
         <td><%= employee.filing_status.capitalize %></td>
         <td><%= link_to 'Show', employee_path(employee), class: "btn btn-primary" %></td>
         <td><%= link_to 'Edit', edit_employee_path(employee), class: "btn btn-secondary" %></td>

@@ -13,7 +13,11 @@
 
 <p>
   <strong>401K Rate:</strong>
-  <%= number_to_percentage(@employee.retirement_rate * 100, precision: 0) %>
+  <% if @employee.retirement_rate %>
+    <%= number_to_percentage(@employee.retirement_rate * 100, precision: 0) %>
+  <% else %>
+    N/A
+  <% end %>
 </p>
 
 <p>

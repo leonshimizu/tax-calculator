@@ -29,7 +29,7 @@
 
   <div>
     <%= form.label :retirement_rate, '401K Rate' %><br>
-    <%= form.number_field :retirement_rate, step: 0.01 %>
+    <%= form.number_field :retirement_rate, step: 0.01, min: 0, required: false %>
   </div>
 
   <div>

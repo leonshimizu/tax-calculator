@@ -2,6 +2,7 @@
 class Employee < ApplicationRecord
   has_many :payroll_records, dependent: :destroy
   before_save :convert_retirement_rate_to_percentage
+  validates :retirement_rate, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
 
   private
 

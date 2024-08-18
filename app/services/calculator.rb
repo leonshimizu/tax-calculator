@@ -33,31 +33,31 @@ class Calculator
     ]
   }
 
-  def self.calculate_withholding(gross_income, filing_status)
+  def self.calculate_withholding(gross_pay, filing_status)
     # Select the tax table based on the filing status
     tax_table = TAX_TABLES[filing_status.to_sym]
 
     # Find the applicable tax bracket
     bracket = tax_table.find do |row|
-      gross_income >= row[:min_income] && gross_income <= row[:max_income]
+      gross_pay >= row[:min_income] && gross_pay <= row[:max_income]
     end
 
     # Calculate the withholding tax based on the bracket
     if bracket
-      tax = (gross_income - bracket[:threshold]) * bracket[:rate] + bracket[:base_tax]
+      tax = (gross_pay - bracket[:threshold]) * bracket[:rate] + bracket[:base_tax]
       tax.round(2)
     else
       0.00
     end
   end
   
-  def self.calculate_social_security(gross_income)
-    tax = gross_income * 0.062
+  def self.calculate_social_security(gross_pay)
+    tax = gross_pay * 0.062
     tax.round(2)
   end
   
-  def self.calculate_medicare(gross_income)
-    tax = gross_income * 0.0145
+  def self.calculate_medicare(gross_pay)
+    tax = gross_pay * 0.0145
     tax.round(2)
   end
 end

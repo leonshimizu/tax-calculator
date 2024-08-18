@@ -8,73 +8,47 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-Employee.create([
-  {
-    name: "Alice Johnson",
-    filing_status: "single",
-    pay_rate: 25.50,
-    retirement_rate: 0.05,
-    position: "front_of_house"
-  },
-  {
-    name: "Bob Smith",
-    filing_status: "married",
-    pay_rate: 22.00,
-    retirement_rate: 0.07,
-    position: "back_of_house"
-  },
-  {
-    name: "Carol White",
-    filing_status: "married",
-    pay_rate: 30.00,
-    retirement_rate: 0.06,
-    position: "front_of_house"
-  },
-  {
-    name: "David Brown",
-    filing_status: "single",
-    pay_rate: 18.00,
-    retirement_rate: 0.04,
-    position: "back_of_house"
-  }
+# Create sample employees
+employees = Employee.create([
+  { name: "Alice Johnson", filing_status: "single", pay_rate: 25.0, retirement_rate: 0.05, position: "front_of_house" },
+  { name: "Bob Smith", filing_status: "married", pay_rate: 30.0, retirement_rate: 0.07, position: "back_of_house" }
 ])
 
-# Might need to adjust employee_id based on your actual Employee records in the database
-PayrollRecord.create([
-  {
-    employee_id: 1, # Assuming Alice's ID is 1
-    hours_worked: 40,
-    overtime_hours_worked: 5,
-    reported_tips: 120.50,
-    loan_payment: 50,
-    insurance_payment: 75,
-    date: Date.today
-  },
-  {
-    employee_id: 2, # Assuming Bob's ID is 2
-    hours_worked: 40,
-    overtime_hours_worked: 3,
-    reported_tips: 80.00,
-    loan_payment: 0,
-    insurance_payment: 90,
-    date: Date.today
-  },
-  {
-    employee_id: 3, # Assuming Carol's ID is 3
-    hours_worked: 38,
-    overtime_hours_worked: 2,
-    reported_tips: 200.00,
-    loan_payment: 0,
-    insurance_payment: 60,
-    date: Date.today
-  },
-  {
-    employee_id: 4, # Assuming David's ID is 4
-    hours_worked: 42,
-    overtime_hours_worked: 6,
-    reported_tips: 95.25,
-    loan_payment: 100,
-    insurance_payment: 50,
-    date: Date.today
-  }
-])
+# For each employee, create payroll records
+employees.each do |employee|
+  PayrollRecord.create([
+    {
+      employee_id: employee.id,
+      hours_worked: 40,
+      overtime_hours_worked: 5,
+      reported_tips: 120.50,
+      loan_payment: 50,
+      insurance_payment: 100,
+      date: Date.today - 15,
+      gross_pay: 1400, # Assume gross pay needs to be calculated or set here for the example
+      net_pay: 1200, # Same assumption as gross pay
+      withholding_tax: 200,
+      social_security_tax: 86.80, # 6.2% of gross for SS tax, just as an example
+      medicare_tax: 20.30, # 1.45% of gross for Medicare tax
+      retirement_payment: 70 # 5% of gross pay for retirement
+    },
+    {
+      employee_id: employee.id,
+      hours_worked: 42,
+      overtime_hours_worked: 3,
+      reported_tips: 100,
+      loan_payment: 50,
+      insurance_payment: 100,
+      date: Date.today - 7,
+      gross_pay: 1450,
+      net_pay: 1250,
+      withholding_tax: 210,
+      social_security_tax: 89.90,
+      medicare_tax: 21.05,
+      retirement_payment: 72.50
+    }
+  ])
+end
+
+puts "Seeds created successfully!"
+

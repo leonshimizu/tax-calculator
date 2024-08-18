@@ -1,0 +1,56 @@
+<!-- app/views/payroll_records/show.html.erb -->
+<h1>Payroll Record Details</h1>
+
+<table>
+  <tr>
+    <th>Employee Name:</th>
+    <td><%= @payroll_record.employee.name %></td>
+  </tr>
+  <tr>
+    <th>Date:</th>
+    <td><%= @payroll_record.date %></td>
+  </tr>
+  <tr>
+    <th>Hours Worked:</th>
+    <td><%= @payroll_record.hours_worked %></td>
+  </tr>
+  <tr>
+    <th>Overtime Hours:</th>
+    <td><%= @payroll_record.overtime_hours_worked %></td>
+  </tr>
+  <tr>
+    <th>Reported Tips:</th>
+    <td><%= number_to_currency(@payroll_record.reported_tips) %></td>
+  </tr>
+  <tr>
+    <th>Gross Income:</th>
+    <td><%= number_to_currency(@payroll_record.calculate_gross_pay) %></td>
+  </tr>
+  <tr>
+    <th>Net Pay:</th>
+    <td><%= number_to_currency(@payroll_record.calculate_net_pay) %></td>
+  </tr>
+  <tr>
+    <th>Loan Payment:</th>
+    <td><%= number_to_currency(@payroll_record.loan_payment) %></td>
+  </tr>
+  <tr>
+    <th>Insurance Payment:</th>
+    <td><%= number_to_currency(@payroll_record.insurance_payment) %></td>
+  </tr>
+  <tr>
+    <th>Withholding Tax:</th>
+    <td><%= number_to_currency(@payroll_record.calculate_withholding) %></td>
+  </tr>
+  <tr>
+    <th>Social Security Tax:</th>
+    <td><%= number_to_currency(@payroll_record.calculate_social_security) %></td>
+  </tr>
+  <tr>
+    <th>Medicare Tax:</th>
+    <td><%= number_to_currency(@payroll_record.calculate_medicare) %></td>
+  </tr>
+</table>
+
+<%= link_to 'Edit', edit_employee_payroll_record_path(@employee, @payroll_record) %> |
+<%= link_to 'Back to Payroll Records', employee_payroll_records_path(@employee) %>

@@ -6,6 +6,9 @@ class Employee < ApplicationRecord
   validates :name, presence: true
   validates :pay_rate, presence: true, numericality: { greater_than_or_equal_to: 0.01 }
 
+  FILING_STATUSES = ['single', 'married', 'head_of_household']
+  POSITIONS = ['front_of_house', 'back_of_house']
+
   private
 
   def convert_retirement_rate_to_percentage

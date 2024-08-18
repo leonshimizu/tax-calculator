@@ -19,7 +19,7 @@
 
   <div>
     <%= form.label :filing_status %><br>
-    <%= form.select :filing_status, ['single', 'married', 'head_of_household'] %>
+    <%= form.select :filing_status, Employee::FILING_STATUSES %>
   </div>
 
   <div>
@@ -34,7 +34,7 @@
 
   <div>
     <%= form.label :position %><br>
-    <%= form.select :position, ['front_of_house', 'back_of_house'] %>
+    <%= form.select :position, Employee::POSITIONS %>
   </div>
 
   <div>

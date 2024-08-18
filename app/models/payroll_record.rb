@@ -2,6 +2,10 @@
 class PayrollRecord < ApplicationRecord
   belongs_to :employee
 
+  # Validates that hours worked and date are present
+  validates :hours_worked, presence: true, numericality: { greater_than_or_equal_to: 0.01 }
+  validates :date, presence: true
+
   # Callback to calculate payroll details before saving
   before_save :update_payroll_details
 
@@ -9,10 +13,10 @@ class PayrollRecord < ApplicationRecord
     # Calculate gross income based on hours worked, overtime, and tips
     if self.overtime_hours_worked == nil
       self.gross_pay = (self.hours_worked * employee.pay_rate) + 
-                          (self.overtime_hours_worked * employee.pay_rate * 1.5) + 
                           self.reported_tips
     else
       self.gross_pay = (self.hours_worked * employee.pay_rate) + 
+                          (self.overtime_hours_worked * employee.pay_rate * 1.5) + 
                           self.reported_tips
     end
   end

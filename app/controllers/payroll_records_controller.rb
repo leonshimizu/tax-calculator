@@ -11,6 +11,13 @@ class PayrollRecordsController < ApplicationController
 
   # GET /payroll_records/:id
   def show
+    @payroll_record = PayrollRecord.find(params[:id])
+    @gross_pay = @payroll_record.calculate_gross_pay
+    @net_pay = @payroll_record.calculate_net_pay
+    @withholding_tax = @payroll_record.calculate_withholding
+    @social_security_tax = @payroll_record.calculate_social_security
+    @medicare_tax = @payroll_record.calculate_medicare
+    # Add more pre-calculations as necessary
   end
 
   def new

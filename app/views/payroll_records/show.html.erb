@@ -16,7 +16,8 @@
   </tr>
   <tr>
     <th>Overtime Hours:</th>
-    <td><%= @payroll_record.overtime_hours_worked %></td>
+    <td><%= @payroll_record.overtime_hours_worked.present? ? @payroll_record.overtime_hours_worked : "N/A" %></td>
+
   </tr>
   <tr>
     <th>Reported Tips:</th>
@@ -24,11 +25,11 @@
   </tr>
   <tr>
     <th>Gross Income:</th>
-    <td><%= number_to_currency(@payroll_record.calculate_gross_pay) %></td>
+    <td><%= number_to_currency(@gross_pay) %></td>
   </tr>
   <tr>
     <th>Net Pay:</th>
-    <td><%= number_to_currency(@payroll_record.calculate_net_pay) %></td>
+    <td><%= number_to_currency(@net_pay) %></td>
   </tr>
   <tr>
     <th>Loan Payment:</th>
@@ -40,15 +41,15 @@
   </tr>
   <tr>
     <th>Withholding Tax:</th>
-    <td><%= number_to_currency(@payroll_record.calculate_withholding) %></td>
+    <td><%= number_to_currency(@withholding_tax) %></td>
   </tr>
   <tr>
     <th>Social Security Tax:</th>
-    <td><%= number_to_currency(@payroll_record.calculate_social_security) %></td>
+    <td><%= number_to_currency(@social_security_tax) %></td>
   </tr>
   <tr>
     <th>Medicare Tax:</th>
-    <td><%= number_to_currency(@payroll_record.calculate_medicare) %></td>
+    <td><%= number_to_currency(@medicare_tax) %></td>
   </tr>
 </table>
 

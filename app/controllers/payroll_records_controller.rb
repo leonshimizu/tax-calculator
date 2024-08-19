@@ -7,49 +7,46 @@ class PayrollRecordsController < ApplicationController
   # GET /employees/:employee_id/payroll_records
   def index
     @payroll_records = @employee.payroll_records.all
+    render json: @payroll_records
   end
 
   # GET /payroll_records/:id
   def show
-    @payroll_record = PayrollRecord.find(params[:id])
-    @gross_pay = @payroll_record.calculate_gross_pay
-    @net_pay = @payroll_record.calculate_net_pay
-    @withholding_tax = @payroll_record.calculate_withholding
-    @social_security_tax = @payroll_record.calculate_social_security
-    @medicare_tax = @payroll_record.calculate_medicare
-    # Add more pre-calculations as necessary
-  end
-
-  def new
-    @payroll_record = @employee.payroll_records.build
+    render json: {
+      payroll_record: @payroll_record,
+      gross_pay: @gross_pay,
+      net_pay: @net_pay,
+      withholding_tax: @withholding_tax,
+      social_security_tax: @social_security_tax,
+      medicare_tax: @medicare_tax
+    }
   end
 
   def create
     @payroll_record = @employee.payroll_records.build(payroll_record_params)
     if @payroll_record.save
-      redirect_to employee_payroll_record_path(@employee, @payroll_record), notice: 'Payroll record was successfully created.'
+      render json: @payroll_record, status: :created, location: employee_payroll_record_path(@employee, @payroll_record)
     else
-      render :new
+      render json: @payroll_record.errors, status: :unprocessable_entity
     end
-  end
-
-  # GET /payroll_records/:id/edit
-  def edit
   end
 
   # PATCH/PUT /payroll_records/:id
   def update
     if @payroll_record.update(payroll_record_params)
-      redirect_to employee_payroll_record_path(@employee, @payroll_record), notice: 'Payroll record was successfully updated.'
+      render json: @payroll_record
     else
-      render :edit
+      render json: @payroll_record.errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /payroll_records/:id
   def destroy
-    @payroll_record.destroy
-    redirect_to employee_payroll_records_path(@employee), notice: 'Payroll record was successfully destroyed.'
+    if @payroll_record.destroy
+      render json: { notice: 'Payroll record was successfully destroyed.' }
+    else
+      render json: { error: 'Error destroying payroll record.' }, status: :unprocessable_entity
+    end
   end
 
   private
@@ -64,7 +61,7 @@ class PayrollRecordsController < ApplicationController
   end
 
   def handle_not_found
-    redirect_to employee_payroll_records_path(@employee), alert: "Employee not found."
+    render json: { error: 'Record not found.' }, status: :not_found
   end
 
   # Only allow a list of trusted parameters through

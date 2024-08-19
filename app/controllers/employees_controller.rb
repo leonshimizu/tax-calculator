@@ -4,38 +4,36 @@ class EmployeesController < ApplicationController
 
   def index
     @employees = Employee.all
+    render json: @employees
   end
 
   def show
-  end
-
-  def new
-    @employee = Employee.new
+    render json: @employee
   end
 
   def create
     @employee = Employee.new(employee_params)
     if @employee.save
-      redirect_to employee_path(@employee), notice: 'Employee was successfully created.'
+      render json: @employee, status: :created, location: @employee
     else
-      render :new
+      render json: @employee.errors, status: :unprocessable_entity
     end
-  end
-
-  def edit
   end
 
   def update
     if @employee.update(employee_params)
-      redirect_to employee_path(@employee), notice: 'Employee was successfully updated.'
+      render json: @employee
     else
-      render :edit
+      render json: @employee.errors, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @employee.destroy
-    redirect_to employees_url, notice: 'Employee was successfully destroyed.'
+    if @employee.destroy
+      render json: { notice: 'Employee was successfully destroyed.' }
+    else
+      render json: { error: 'Error destroying employee.' }, status: :unprocessable_entity
+    end
   end
   
   private
@@ -45,7 +43,7 @@ class EmployeesController < ApplicationController
   end
 
   def handle_not_found
-    redirect_to employees_path, alert: "Employee not found."
+    render json: { error: 'Employee not found.' }, status: :not_found
   end
   
   def employee_params

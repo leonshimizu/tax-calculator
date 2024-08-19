@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: my-rails-app
+    env: ruby
+    plan: free # or another plan based on your needs
+    buildCommand: bundle install
+    startCommand: bundle exec rails server
+    postDeployCommand: |
+      bundle exec rails db:create
+      bundle exec rails db:migrate
+    # Optional: specify the port if it's not the default
+    # port: 3000
+    # Optional: set environment variables
+    # envVars:
+    #   - key: DATABASE_URL
+    #     value: your_database_url
+    #   - key: RAILS_ENV
+    #     value: production
+    # Optional: add additional settings or commands as needed

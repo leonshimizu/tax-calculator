@@ -1,7 +1,7 @@
 # app/controllers/payroll_records_controller.rb
 class PayrollRecordsController < ApplicationController
   before_action :set_employee
-  before_action :set_payroll_record, only: [:show, :edit, :update, :destroy]
+  before_action :set_payroll_record, only: [:show, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   # GET /employees/:employee_id/payroll_records

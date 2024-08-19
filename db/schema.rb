@@ -11,6 +11,9 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.1].define(version: 2024_08_18_085438) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "employees", force: :cascade do |t|
     t.string "name"
     t.string "filing_status"
@@ -22,7 +25,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_18_085438) do
   end
 
   create_table "payroll_records", force: :cascade do |t|
-    t.integer "employee_id", null: false
+    t.bigint "employee_id", null: false
     t.decimal "hours_worked"
     t.decimal "overtime_hours_worked"
     t.decimal "reported_tips"

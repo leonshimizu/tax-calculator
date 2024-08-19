@@ -1,12 +1,14 @@
 services:
   - type: web
-    name: my-rails-app
+    name: tax-calculator
     env: ruby
     buildCommand: |
       bundle install
       yarn install --frozen-lockfile
       rails assets:precompile
     startCommand: bundle exec puma -C config/puma.rb
+    postDeployCommand: |
+      bundle exec rails db:create db:migrate
     envVars:
       - key: DATABASE_URL
         fromDatabase:

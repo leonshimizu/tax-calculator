@@ -10,8 +10,8 @@
 
 # Create sample employees
 employees = Employee.create([
-  { name: "Alice Johnson", filing_status: "single", pay_rate: 25.0, retirement_rate: 0.05, position: "front_of_house" },
-  { name: "Bob Smith", filing_status: "married", pay_rate: 30.0, retirement_rate: 0.07, position: "back_of_house" }
+  { name: "Alice Johnson", filing_status: "single", pay_rate: 25.0, retirement_rate: 5, position: "front_of_house" },
+  { name: "Bob Smith", filing_status: "married", pay_rate: 30.0, retirement_rate: 7, position: "back_of_house" }
 ])
 
 # For each employee, create payroll records

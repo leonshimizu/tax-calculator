@@ -14,11 +14,12 @@ class PayrollRecordsController < ApplicationController
   def show
     render json: {
       payroll_record: @payroll_record,
-      gross_pay: @gross_pay,
-      net_pay: @net_pay,
-      withholding_tax: @withholding_tax,
-      social_security_tax: @social_security_tax,
-      medicare_tax: @medicare_tax
+      gross_pay: @payroll_record.gross_pay,
+      net_pay: @payroll_record.net_pay,
+      withholding_tax: @payroll_record.withholding_tax,
+      social_security_tax: @payroll_record.social_security_tax,
+      medicare_tax: @payroll_record.medicare_tax,
+      retirement_payment: @payroll_record.retirement_payment
     }
   end
 
@@ -66,7 +67,7 @@ class PayrollRecordsController < ApplicationController
 
   # Only allow a list of trusted parameters through
   def payroll_record_params
-    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date)
+    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :retirement_payment, :date)
   end
 
   # method isn't currently being used but I'd like to keep it here till I verify that won't use it in the future

@@ -20,12 +20,13 @@ class PayrollRecord < ApplicationRecord
     self.withholding_tax = Calculator.calculate_withholding(self.gross_pay, employee.filing_status)
     self.social_security_tax = Calculator.calculate_social_security(self.gross_pay)
     self.medicare_tax = Calculator.calculate_medicare(self.gross_pay)
+    calculate_retirement_payment
     calculate_net_pay
   end
 
   def calculate_net_pay
     # Ensure all are converted to floats to handle nil values gracefully.
-    fields = [self.withholding_tax, self.social_security_tax, self.medicare_tax, self.loan_payment, self.insurance_payment]
+    fields = [self.withholding_tax, self.social_security_tax, self.medicare_tax, self.loan_payment, self.insurance_payment, self.retirement_payment]
     total_deductions = fields.map(&:to_f).sum
   
     self.net_pay = self.gross_pay.to_f - total_deductions
@@ -41,5 +42,9 @@ class PayrollRecord < ApplicationRecord
 
   def calculate_medicare
     self.medicare_tax = Calculator.calculate_medicare(self.gross_pay)
+  end
+
+  def calculate_retirement_payment
+    self.retirement_payment = self.gross_pay.to_f * (employee.retirement_rate.to_f / 100)
   end
 end

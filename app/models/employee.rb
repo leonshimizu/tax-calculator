@@ -6,4 +6,8 @@ class Employee < ApplicationRecord
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :pay_rate, presence: true, numericality: { greater_than_or_equal_to: 0.01 }
+
+  def ytd_totals(year)
+    payroll_records.where(date: Date.new(year, 1, 1)..Date.new(year, 12, 31)).sum_fields
+  end
 end

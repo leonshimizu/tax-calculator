@@ -9,6 +9,20 @@ class PayrollRecord < ApplicationRecord
   # Callback to calculate payroll details before saving
   before_save :update_payroll_details
 
+  scope :sum_fields, -> {
+    select("SUM(hours_worked) AS total_hours_worked,
+            SUM(overtime_hours_worked) AS total_overtime_hours_worked,
+            SUM(reported_tips) AS total_reported_tips,
+            SUM(loan_payment) AS total_loan_payment,
+            SUM(insurance_payment) AS total_insurance_payment,
+            SUM(gross_pay) AS total_gross_pay,
+            SUM(net_pay) AS total_net_pay,
+            SUM(withholding_tax) AS total_withholding_tax,
+            SUM(social_security_tax) AS total_social_security_tax,
+            SUM(medicare_tax) AS total_medicare_tax,
+            SUM(retirement_payment) AS total_retirement_payment").first
+  }
+
   def calculate_gross_pay
     overtime_pay = self.overtime_hours_worked.to_f * employee.pay_rate * 1.5
     self.gross_pay = ((self.hours_worked * employee.pay_rate) + overtime_pay + self.reported_tips.to_f).round(2)

@@ -7,12 +7,13 @@ class PayrollRecordsController < ApplicationController
   # GET /employees/:employee_id/payroll_records
   def index
     if params[:date].present?
-      @payroll_records = PayrollRecord.where(date: params[:date])
+      @payroll_records = PayrollRecord.where(date: params[:date]).includes(:employee)
     else
-      @payroll_records = @employee.payroll_records.all
+      @employee = Employee.find(params[:employee_id])
+      @payroll_records = @employee.payroll_records.includes(:employee).all
     end
-
-    render json: @payroll_records
+  
+    render json: @payroll_records.as_json(include: :employee)
   end
 
   # GET /payroll_records/:id

@@ -1,12 +1,19 @@
 # config/routes.rb
 Rails.application.routes.draw do
-  # Define a separate route for batch processing
-  post 'employees/batch/payroll_records', to: 'payroll_records#batch_create'
+  # Define a separate route for batch processing within the context of a company
+  post 'companies/:company_id/employees/batch/payroll_records', to: 'payroll_records#batch_create'
+
+  # Route for fetching payroll records across all companies by date
   get 'payroll_records', to: 'payroll_records#index'
-  
-  # Other routes for individual payroll records
-  resources :employees do
-    resources :payroll_records, only: [:index, :show, :create, :update, :destroy]
+
+  # Define routes for companies
+  resources :companies do
+    resources :employees do
+      resources :payroll_records, only: [:index, :show, :create, :update, :destroy]
+    end
+
+    # Route to fetch all payroll records for a company
+    resources :payroll_records, only: [:index]
   end
   
   get 'calculate', to: 'tax_calculator#calculate'

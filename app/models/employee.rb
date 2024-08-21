@@ -1,5 +1,6 @@
 # app/models/employee.rb
 class Employee < ApplicationRecord
+  belongs_to :company
   has_many :payroll_records, dependent: :destroy
   validates :retirement_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100, allow_nil: true }
   validates :first_name, presence: true

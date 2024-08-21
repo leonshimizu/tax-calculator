@@ -10,9 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_21_162152) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_21_170241) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "companies", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "employees", force: :cascade do |t|
     t.string "filing_status"
@@ -23,6 +29,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_21_162152) do
     t.datetime "updated_at", null: false
     t.string "first_name"
     t.string "last_name"
+    t.bigint "company_id"
+    t.index ["company_id"], name: "index_employees_on_company_id"
   end
 
   create_table "payroll_records", force: :cascade do |t|
@@ -44,5 +52,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_21_162152) do
     t.index ["employee_id"], name: "index_payroll_records_on_employee_id"
   end
 
+  add_foreign_key "employees", "companies"
   add_foreign_key "payroll_records", "employees"
 end

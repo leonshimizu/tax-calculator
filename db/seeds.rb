@@ -8,47 +8,67 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# Create sample employees
-employees = Employee.create([
-  { name: "Alice Johnson", filing_status: "single", pay_rate: 25.0, retirement_rate: 5, position: "front_of_house" },
-  { name: "Bob Smith", filing_status: "married", pay_rate: 30.0, retirement_rate: 7, position: "back_of_house" }
-])
+# Clear existing data
+PayrollRecord.destroy_all
+Employee.destroy_all
 
-# For each employee, create payroll records
-employees.each do |employee|
-  PayrollRecord.create([
-    {
-      employee_id: employee.id,
-      hours_worked: 40,
-      overtime_hours_worked: 5,
-      reported_tips: 120.50,
-      loan_payment: 50,
-      insurance_payment: 100,
-      date: Date.today - 15,
-      gross_pay: 1400, # Assume gross pay needs to be calculated or set here for the example
-      net_pay: 1200, # Same assumption as gross pay
-      withholding_tax: 200,
-      social_security_tax: 86.80, # 6.2% of gross for SS tax, just as an example
-      medicare_tax: 20.30, # 1.45% of gross for Medicare tax
-      retirement_payment: 70 # 5% of gross pay for retirement
-    },
-    {
-      employee_id: employee.id,
-      hours_worked: 42,
-      overtime_hours_worked: 3,
-      reported_tips: 100,
-      loan_payment: 50,
-      insurance_payment: 100,
-      date: Date.today - 7,
-      gross_pay: 1450,
-      net_pay: 1250,
-      withholding_tax: 210,
-      social_security_tax: 89.90,
-      medicare_tax: 21.05,
-      retirement_payment: 72.50
-    }
-  ])
+# Create Employees
+employees = [
+  {
+    first_name: "John",
+    last_name: "Doe",
+    filing_status: "single",
+    pay_rate: 25.00,
+    retirement_rate: 5.0,
+    department: "back_of_house"
+  },
+  {
+    first_name: "Jane",
+    last_name: "Smith",
+    filing_status: "married",
+    pay_rate: 30.00,
+    retirement_rate: 4.0,
+    department: "front_of_house"
+  },
+  {
+    first_name: "Alice",
+    last_name: "Johnson",
+    filing_status: "head_of_household",
+    pay_rate: 22.50,
+    retirement_rate: 6.0,
+    department: "front_of_house"
+  },
+  {
+    first_name: "Bob",
+    last_name: "Brown",
+    filing_status: "single",
+    pay_rate: 20.00,
+    retirement_rate: 3.0,
+    department: "back_of_house"
+  }
+]
+
+employees.each do |employee_data|
+  Employee.create!(employee_data)
 end
 
-puts "Seeds created successfully!"
+# Create Payroll Records for each employee
+Employee.find_each do |employee|
+  PayrollRecord.create!(
+    employee_id: employee.id,
+    hours_worked: 80.0,
+    overtime_hours_worked: 10.0,
+    reported_tips: 100.00,
+    loan_payment: 50.00,
+    insurance_payment: 75.00,
+    date: Date.today,
+    gross_pay: employee.pay_rate * 80 + (employee.pay_rate * 1.5 * 10) + 100.00,
+    net_pay: nil, # This will be calculated automatically by the model
+    withholding_tax: nil, # This will be calculated automatically by the model
+    social_security_tax: nil, # This will be calculated automatically by the model
+    medicare_tax: nil, # This will be calculated automatically by the model
+    retirement_payment: nil # This will be calculated automatically by the model
+  )
+end
 
+puts "Seeding complete!"

@@ -13,4 +13,3 @@ Rails.application.routes.draw do
   get 'net_pay/show', to: 'net_pay#show'
   root 'net_pay#show'
 end
-

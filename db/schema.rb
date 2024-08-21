@@ -10,18 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_18_085438) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_21_162152) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "employees", force: :cascade do |t|
-    t.string "name"
     t.string "filing_status"
     t.decimal "pay_rate", precision: 10, scale: 2
     t.decimal "retirement_rate"
-    t.string "position"
+    t.string "department"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "first_name"
+    t.string "last_name"
   end
 
   create_table "payroll_records", force: :cascade do |t|

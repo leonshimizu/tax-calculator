@@ -5,11 +5,11 @@ one:
   filing_status: MyString
   pay_rate: 9.99
   retirement_rate: 9.99
-  position: MyString
+  department: MyString
 
 two:
   name: MyString
   filing_status: MyString
   pay_rate: 9.99
   retirement_rate: 9.99
-  position: MyString
+  department: MyString

@@ -1,22 +1,27 @@
 # app/controllers/payroll_records_controller.rb
 class PayrollRecordsController < ApplicationController
+  before_action :set_company, only: [:index, :batch_create]
   before_action :set_employee, only: [:index, :create]
   before_action :set_payroll_record, only: [:show, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
-  # GET /employees/:employee_id/payroll_records
+  # GET /companies/:company_id/employees/:employee_id/payroll_records
+  # GET /companies/:company_id/payroll_records
   def index
     if params[:date].present?
-      @payroll_records = PayrollRecord.where(date: params[:date]).includes(:employee)
+      @payroll_records = @company.payroll_records.where(date: params[:date]).includes(:employee)
     else
-      @employee = Employee.find(params[:employee_id])
-      @payroll_records = @employee.payroll_records.includes(:employee).all
+      if @employee
+        @payroll_records = @employee.payroll_records.includes(:employee).all
+      else
+        @payroll_records = @company.payroll_records.includes(:employee).all
+      end
     end
-  
+
     render json: @payroll_records.as_json(include: :employee)
   end
 
-  # GET /payroll_records/:id
+  # GET /companies/:company_id/employees/:employee_id/payroll_records/:id
   def show
     render json: {
       payroll_record: @payroll_record,
@@ -29,30 +34,30 @@ class PayrollRecordsController < ApplicationController
     }
   end
 
-  # POST /employees/:employee_id/payroll_records
+  # POST /companies/:company_id/employees/:employee_id/payroll_records
   def create
     @payroll_record = @employee.payroll_records.build(payroll_record_params)
     if @payroll_record.save
-      render json: @payroll_record, status: :created, location: employee_payroll_record_path(@employee, @payroll_record)
+      render json: @payroll_record, status: :created, location: company_employee_payroll_record_path(@company, @employee, @payroll_record)
     else
       render json: @payroll_record.errors, status: :unprocessable_entity
     end
   end
 
-  # POST /employees/batch/payroll_records
+  # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create
     payroll_records_params = params.require(:payroll_records).map do |record|
       record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment)
     end
 
     created_records = payroll_records_params.map do |record_params|
-      employee = Employee.find_by(id: record_params[:employee_id])
+      employee = @company.employees.find_by(id: record_params[:employee_id])
       unless employee
-        render json: { error: "Employee with ID #{record_params[:employee_id]} not found." }, status: :not_found and return
+        render json: { error: "Employee with ID #{record_params[:employee_id]} not found in company." }, status: :not_found and return
       end
       employee.payroll_records.create(record_params)
     end
-    
+
     if created_records.all?(&:persisted?)
       render json: created_records, status: :created
     else
@@ -60,7 +65,7 @@ class PayrollRecordsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /payroll_records/:id
+  # PATCH/PUT /companies/:company_id/employees/:employee_id/payroll_records/:id
   def update
     if @payroll_record.update(payroll_record_params)
       render json: @payroll_record
@@ -69,7 +74,7 @@ class PayrollRecordsController < ApplicationController
     end
   end
 
-  # DELETE /payroll_records/:id
+  # DELETE /companies/:company_id/employees/:employee_id/payroll_records/:id
   def destroy
     if @payroll_record.destroy
       render json: { notice: 'Payroll record was successfully destroyed.' }
@@ -81,9 +86,13 @@ class PayrollRecordsController < ApplicationController
   private
 
   # Use callbacks to share common setup or constraints between actions
+  def set_company
+    @company = Company.find(params[:company_id])
+  end
+
   def set_employee
     if params[:employee_id]
-      @employee = Employee.find(params[:employee_id])
+      @employee = @company.employees.find(params[:employee_id])
     end
   end
 

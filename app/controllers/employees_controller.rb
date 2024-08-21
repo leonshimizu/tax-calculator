@@ -1,9 +1,10 @@
 class EmployeesController < ApplicationController
+  before_action :set_company
   before_action :set_employee, only: [:show, :edit, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   def index
-    @employees = Employee.all
+    @employees = @company.employees.all
     render json: @employees
   end
 
@@ -12,9 +13,9 @@ class EmployeesController < ApplicationController
   end
 
   def create
-    @employee = Employee.new(employee_params)
+    @employee = @company.employees.build(employee_params)
     if @employee.save
-      render json: @employee, status: :created, location: @employee
+      render json: @employee, status: :created
     else
       render json: @employee.errors, status: :unprocessable_entity
     end
@@ -38,6 +39,10 @@ class EmployeesController < ApplicationController
   
   private
 
+  def set_company
+    @company = Company.find(params[:company_id])
+  end
+
   def set_employee
     @employee = Employee.find(params[:id])
   end
@@ -47,6 +52,6 @@ class EmployeesController < ApplicationController
   end
   
   def employee_params
-    params.require(:employee).permit(:first_name, :last_name, :filing_status, :pay_rate, :retirement_rate, :department)
+    params.require(:employee).permit(:first_name, :last_name, :department, :pay_rate, :retirement_rate, :filing_status)
   end
 end

@@ -13,9 +13,22 @@ Rails.application.routes.draw do
     end
 
     # Route to fetch all payroll records for a company
-    resources :payroll_records, only: [:index]
+    get 'payroll_records', to: 'payroll_records#index'
+
+    # Routes for YTD totals
+    member do
+      get 'department_ytd_totals', to: 'companies#department_ytd_totals'
+      get 'company_ytd_totals', to: 'companies#company_ytd_totals'
+    end
   end
-  
+
+  # Route to fetch YTD totals for an employee
+  resources :employees do
+    member do
+      get 'ytd_totals', to: 'employees#ytd_totals'
+    end
+  end
+
   get 'calculate', to: 'tax_calculator#calculate'
   get 'net_pay/show', to: 'net_pay#show'
   root 'net_pay#show'

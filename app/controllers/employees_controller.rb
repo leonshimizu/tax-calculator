@@ -1,6 +1,6 @@
 class EmployeesController < ApplicationController
   before_action :set_company
-  before_action :set_employee, only: [:show, :edit, :update, :destroy]
+  before_action :set_employee, only: [:show, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   def index
@@ -36,6 +36,12 @@ class EmployeesController < ApplicationController
       render json: { error: 'Error destroying employee.' }, status: :unprocessable_entity
     end
   end
+
+  def ytd_totals
+    employee = Employee.find(params[:id])
+    year = params[:year].to_i || Time.current.year
+    render json: employee.ytd_totals(year)
+  end
   
   private
 
@@ -44,7 +50,10 @@ class EmployeesController < ApplicationController
   end
 
   def set_employee
-    @employee = Employee.find(params[:id])
+    @employee = @company.employees.find_by(id: params[:employee_id] || params[:id])
+    unless @employee
+      render json: { error: 'Employee not found.' }, status: :not_found
+    end
   end
 
   def handle_not_found

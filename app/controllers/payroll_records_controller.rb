@@ -1,7 +1,7 @@
 # app/controllers/payroll_records_controller.rb
 class PayrollRecordsController < ApplicationController
-  before_action :set_company, only: [:index, :batch_create]
-  before_action :set_employee, only: [:index, :create]
+  before_action :set_company
+  before_action :set_employee, only: [:index, :create, :show, :update, :destroy]
   before_action :set_payroll_record, only: [:show, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
@@ -97,7 +97,7 @@ class PayrollRecordsController < ApplicationController
   end
 
   def set_payroll_record
-    @payroll_record = PayrollRecord.find(params[:id])
+    @payroll_record = @employee.payroll_records.find(params[:id])
   end
 
   def handle_not_found

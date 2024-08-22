@@ -8,8 +8,8 @@ class PayrollCalculator
 
   def self.for(employee, payroll_record)
     case employee.payroll_type
-    when 'salaried'
-      SalariedPayrollCalculator.new(employee, payroll_record)
+    when 'salary'
+      SalaryPayrollCalculator.new(employee, payroll_record)
     when 'hourly'
       HourlyPayrollCalculator.new(employee, payroll_record)
     else

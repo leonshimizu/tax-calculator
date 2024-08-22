@@ -115,7 +115,7 @@ class PayrollRecordsController < ApplicationController
 
   def process_payroll_record_params(params, employee)
     params = params.dup
-    if employee.payroll_type == 'salaried'
+    if employee.payroll_type == 'salary'
       params[:gross_pay] = params[:gross_pay].to_f if params[:gross_pay].present?
       params.delete(:hours_worked)
       params.delete(:overtime_hours_worked)

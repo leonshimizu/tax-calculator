@@ -1,22 +1,19 @@
-# app/controllers/payroll_records_controller.rb
 class PayrollRecordsController < ApplicationController
   before_action :set_company
-  before_action :set_employee, only: [:index, :create, :show, :update, :destroy]
+  before_action :set_employee, except: :batch_create
   before_action :set_payroll_record, only: [:show, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   # GET /companies/:company_id/employees/:employee_id/payroll_records
   # GET /companies/:company_id/payroll_records
   def index
-    if params[:date].present?
-      @payroll_records = @company.payroll_records.where(date: params[:date]).includes(:employee)
-    else
-      if @employee
-        @payroll_records = @employee.payroll_records.includes(:employee).all
-      else
-        @payroll_records = @company.payroll_records.includes(:employee).all
-      end
-    end
+    @payroll_records = if params[:date].present?
+                         @company.payroll_records.where(date: params[:date]).includes(:employee)
+                       elsif @employee
+                         @employee.payroll_records.includes(:employee).all
+                       else
+                         @company.payroll_records.includes(:employee).all
+                       end
 
     render json: @payroll_records.as_json(include: :employee)
   end
@@ -36,7 +33,10 @@ class PayrollRecordsController < ApplicationController
 
   # POST /companies/:company_id/employees/:employee_id/payroll_records
   def create
-    @payroll_record = @employee.payroll_records.build(payroll_record_params)
+    @payroll_record = @employee.payroll_records.build(processed_payroll_record_params)
+    payroll_calculator = PayrollCalculator.for(@employee, @payroll_record)
+    payroll_calculator.calculate
+
     if @payroll_record.save
       render json: @payroll_record, status: :created, location: company_employee_payroll_record_path(@company, @employee, @payroll_record)
     else
@@ -47,18 +47,21 @@ class PayrollRecordsController < ApplicationController
   # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create
     payroll_records_params = params.require(:payroll_records).map do |record|
-      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment)
+      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :gross_pay, :bonus)
     end
-  
+
     created_records = payroll_records_params.map do |record_params|
       employee = @company.employees.find_by(id: record_params[:employee_id])
       unless employee
         render json: { error: "Employee with ID #{record_params[:employee_id]} not found in company." }, status: :not_found and return
       end
-      payroll_record = employee.payroll_records.create(record_params)
-      payroll_record # Return the ActiveRecord object itself
+      payroll_record = employee.payroll_records.new(process_payroll_record_params(record_params, employee))
+      payroll_calculator = PayrollCalculator.for(employee, payroll_record)
+      payroll_calculator.calculate
+      payroll_record.save
+      payroll_record
     end
-  
+
     if created_records.all?(&:persisted?)
       render json: created_records.map { |record| record.as_json(include: :employee) }, status: :created
     else
@@ -68,7 +71,7 @@ class PayrollRecordsController < ApplicationController
 
   # PATCH/PUT /companies/:company_id/employees/:employee_id/payroll_records/:id
   def update
-    if @payroll_record.update(payroll_record_params)
+    if @payroll_record.update(processed_payroll_record_params)
       render json: @payroll_record
     else
       render json: @payroll_record.errors, status: :unprocessable_entity
@@ -86,15 +89,12 @@ class PayrollRecordsController < ApplicationController
 
   private
 
-  # Use callbacks to share common setup or constraints between actions
   def set_company
     @company = Company.find(params[:company_id])
   end
 
   def set_employee
-    if params[:employee_id]
-      @employee = @company.employees.find(params[:employee_id])
-    end
+    @employee = @company.employees.find(params[:employee_id]) if params[:employee_id]
   end
 
   def set_payroll_record
@@ -105,8 +105,25 @@ class PayrollRecordsController < ApplicationController
     render json: { error: 'Record not found.' }, status: :not_found
   end
 
-  # Only allow a list of trusted parameters through
   def payroll_record_params
-    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date)
+    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, :gross_pay, :bonus)
+  end
+
+  def processed_payroll_record_params
+    process_payroll_record_params(payroll_record_params, @employee)
+  end
+
+  def process_payroll_record_params(params, employee)
+    params = params.dup
+    if employee.payroll_type == 'salary'
+      params[:gross_pay] = params[:gross_pay].to_f if params[:gross_pay].present?
+      params.delete(:hours_worked)
+      params.delete(:overtime_hours_worked)
+    else
+      params[:hours_worked] = params[:hours_worked].to_f if params[:hours_worked].present?
+      params[:overtime_hours_worked] = params[:overtime_hours_worked].to_f if params[:overtime_hours_worked].present?
+      params.delete(:gross_pay)
+    end
+    params
   end
 end

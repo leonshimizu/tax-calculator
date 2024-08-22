@@ -3,7 +3,7 @@ class PayrollRecord < ApplicationRecord
   belongs_to :employee
 
   # Validates that hours worked and date are present
-  validates :hours_worked, presence: true, numericality: { greater_than_or_equal_to: 0.01 }
+  validates :hours_worked, presence: true, numericality: { greater_than_or_equal_to: 0.01 }, if: -> { employee.payroll_type != 'salary' }
   validates :date, presence: true
 
   # Callback to calculate payroll details before saving
@@ -28,13 +28,24 @@ class PayrollRecord < ApplicationRecord
     self.gross_pay = ((self.hours_worked * employee.pay_rate) + overtime_pay + self.reported_tips.to_f).round(2)
   end
 
+  def calculate_total_deductions
+    self.total_deductions = [
+      withholding_tax,
+      social_security_tax,
+      medicare_tax,
+      loan_payment,
+      insurance_payment,
+      retirement_payment
+    ].map(&:to_f).sum.round(2)
+  end
+
   def update_payroll_details
-    # Calculate all payroll details
-    calculate_gross_pay
+    calculate_gross_pay if employee.payroll_type != 'salary'
     calculate_withholding
     calculate_social_security
     calculate_medicare
     calculate_retirement_payment
+    calculate_total_deductions
     calculate_net_pay
   end
 

@@ -40,7 +40,7 @@ class PayrollRecord < ApplicationRecord
   end
 
   def update_payroll_details
-    calculate_gross_pay if employee.department != 'salary'
+    calculate_gross_pay if employee.payroll_type != 'salary'
     calculate_withholding
     calculate_social_security
     calculate_medicare

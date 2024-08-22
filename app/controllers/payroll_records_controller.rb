@@ -115,7 +115,7 @@ class PayrollRecordsController < ApplicationController
   def payroll_record_params
     params.require(:payroll_record).permit(:date, :gross_pay, :loan_payment, :insurance_payment, :reported_tips, 
       :hours_worked, :overtime_hours_worked).tap do |permitted_params|
-      if @employee.department == 'salary'
+      if @employee.payroll_type == 'salary'
         permitted_params.delete(:hours_worked)
         permitted_params.delete(:overtime_hours_worked)
       else

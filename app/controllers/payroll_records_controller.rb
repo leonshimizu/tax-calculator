@@ -113,6 +113,14 @@ class PayrollRecordsController < ApplicationController
 
   # Only allow a list of trusted parameters through
   def payroll_record_params
-    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, :gross_pay)
+    params.require(:payroll_record).permit(:date, :gross_pay, :loan_payment, :insurance_payment, :reported_tips, 
+      :hours_worked, :overtime_hours_worked).tap do |permitted_params|
+      if @employee.department == 'salary'
+        permitted_params.delete(:hours_worked)
+        permitted_params.delete(:overtime_hours_worked)
+      else
+        permitted_params.delete(:gross_pay)
+      end
+    end
   end
 end

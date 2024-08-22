@@ -3,7 +3,7 @@ class PayrollRecord < ApplicationRecord
   belongs_to :employee
 
   # Validates that hours worked and date are present
-  validates :hours_worked, presence: true, numericality: { greater_than_or_equal_to: 0.01 }
+  validates :hours_worked, presence: true, numericality: { greater_than_or_equal_to: 0.01 }, if: -> { employee.payroll_type != 'salaried' }
   validates :date, presence: true
 
   # Callback to calculate payroll details before saving
@@ -40,7 +40,7 @@ class PayrollRecord < ApplicationRecord
   end
 
   def update_payroll_details
-    calculate_gross_pay if employee.payroll_type != 'salary'
+    calculate_gross_pay if employee.payroll_type != 'salaried'
     calculate_withholding
     calculate_social_security
     calculate_medicare

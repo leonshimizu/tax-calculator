@@ -37,6 +37,9 @@ class PayrollRecordsController < ApplicationController
   # POST /companies/:company_id/employees/:employee_id/payroll_records
   def create
     @payroll_record = @employee.payroll_records.build(payroll_record_params)
+    payroll_calculator = PayrollCalculator.for(@employee, @payroll_record)
+    payroll_calculator.calculate
+
     if @payroll_record.save
       render json: @payroll_record, status: :created, location: company_employee_payroll_record_path(@company, @employee, @payroll_record)
     else
@@ -47,18 +50,21 @@ class PayrollRecordsController < ApplicationController
   # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create
     payroll_records_params = params.require(:payroll_records).map do |record|
-      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment)
+      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :gross_pay)
     end
-  
+
     created_records = payroll_records_params.map do |record_params|
       employee = @company.employees.find_by(id: record_params[:employee_id])
       unless employee
         render json: { error: "Employee with ID #{record_params[:employee_id]} not found in company." }, status: :not_found and return
       end
-      payroll_record = employee.payroll_records.create(record_params)
-      payroll_record # Return the ActiveRecord object itself
+      payroll_record = employee.payroll_records.new(record_params)
+      payroll_calculator = PayrollCalculator.for(employee, payroll_record)
+      payroll_calculator.calculate
+      payroll_record.save
+      payroll_record
     end
-  
+
     if created_records.all?(&:persisted?)
       render json: created_records.map { |record| record.as_json(include: :employee) }, status: :created
     else
@@ -107,6 +113,6 @@ class PayrollRecordsController < ApplicationController
 
   # Only allow a list of trusted parameters through
   def payroll_record_params
-    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date)
+    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, :gross_pay)
   end
 end

@@ -7,10 +7,13 @@ class PayrollCalculator
   end
 
   def self.for(employee, payroll_record)
-    if employee.department == 'salary'
+    case employee.payroll_type
+    when 'salaried'
       SalariedPayrollCalculator.new(employee, payroll_record)
-    else
+    when 'hourly'
       HourlyPayrollCalculator.new(employee, payroll_record)
+    else
+      raise "Unsupported payroll type: #{employee.payroll_type}"
     end
   end
 

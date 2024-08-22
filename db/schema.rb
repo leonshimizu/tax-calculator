@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_22_144023) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_22_145210) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,6 +30,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_22_144023) do
     t.string "first_name"
     t.string "last_name"
     t.bigint "company_id"
+    t.string "payroll_type", default: "hourly"
     t.index ["company_id"], name: "index_employees_on_company_id"
   end
 

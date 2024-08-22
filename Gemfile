@@ -14,6 +14,9 @@ gem 'pg'
 # Allows you to insert breakpoints in your code
 gem 'pry-rails'
 
+# Faker helps you generate realistic test data, and populate your database with more than a couple of records while you're doing development.
+gem 'faker'
+
 # Handle Cross-Origin Resource Sharing (CORS), allowing your API to be accessed from other domains
 gem 'rack-cors'
 

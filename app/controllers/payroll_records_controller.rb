@@ -49,19 +49,20 @@ class PayrollRecordsController < ApplicationController
     payroll_records_params = params.require(:payroll_records).map do |record|
       record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment)
     end
-
+  
     created_records = payroll_records_params.map do |record_params|
       employee = @company.employees.find_by(id: record_params[:employee_id])
       unless employee
         render json: { error: "Employee with ID #{record_params[:employee_id]} not found in company." }, status: :not_found and return
       end
-      employee.payroll_records.create(record_params)
+      payroll_record = employee.payroll_records.create(record_params)
+      payroll_record # Return the ActiveRecord object itself
     end
-
+  
     if created_records.all?(&:persisted?)
-      render json: created_records, status: :created
+      render json: created_records.map { |record| record.as_json(include: :employee) }, status: :created
     else
-      render json: { errors: created_records.map(&:errors) }, status: :unprocessable_entity
+      render json: { errors: created_records.map { |record| record.errors.full_messages } }, status: :unprocessable_entity
     end
   end
 

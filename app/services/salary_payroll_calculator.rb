@@ -1,6 +1,6 @@
-class SalariedPayrollCalculator < PayrollCalculator
+class SalaryPayrollCalculator < PayrollCalculator
   def calculate
-    # Assume gross_pay is provided directly for salaried employees
+    # Assume gross_pay is provided directly for salary employees
     calculate_withholding
     calculate_social_security
     calculate_medicare

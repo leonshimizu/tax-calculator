@@ -7,7 +7,7 @@ class Employee < ApplicationRecord
   validates :last_name, presence: true
   validates :pay_rate, presence: true, numericality: { greater_than_or_equal_to: 0.01 }, if: :hourly_employee?
   
-  validates :payroll_type, presence: true, inclusion: { in: %w[hourly salaried] }
+  validates :payroll_type, presence: true, inclusion: { in: %w[hourly salary] }
 
   def ytd_totals(year)
     payroll_records.where(date: Date.new(year, 1, 1)..Date.new(year, 12, 31)).sum_fields
@@ -16,6 +16,6 @@ class Employee < ApplicationRecord
   private
 
   def hourly_employee?
-    payroll_type != 'salaried'
+    payroll_type != 'salary'
   end
 end

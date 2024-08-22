@@ -11,6 +11,9 @@ gem "sprockets-rails"
 # Use postgresql as the database for Active Record
 gem 'pg'
 
+# Allows you to insert breakpoints in your code
+gem 'pry-rails'
+
 # Handle Cross-Origin Resource Sharing (CORS), allowing your API to be accessed from other domains
 gem 'rack-cors'
 

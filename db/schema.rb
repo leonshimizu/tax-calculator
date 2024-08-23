@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_22_145210) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_23_034241) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -31,6 +31,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_22_145210) do
     t.string "last_name"
     t.bigint "company_id"
     t.string "payroll_type", default: "hourly"
+    t.decimal "roth_retirement_rate"
     t.index ["company_id"], name: "index_employees_on_company_id"
   end
 
@@ -52,6 +53,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_22_145210) do
     t.decimal "retirement_payment"
     t.decimal "bonus", precision: 12, scale: 3, default: "0.0"
     t.decimal "total_deductions", precision: 12, scale: 3, default: "0.0"
+    t.decimal "roth_retirement_payment"
     t.index ["employee_id"], name: "index_payroll_records_on_employee_id"
   end
 

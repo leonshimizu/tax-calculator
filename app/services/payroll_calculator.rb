@@ -1,3 +1,4 @@
+# app/services/payroll_calculator.rb
 class PayrollCalculator
   attr_reader :employee, :payroll_record
 
@@ -24,7 +25,8 @@ class PayrollCalculator
   private
 
   def calculate_withholding
-    payroll_record.withholding_tax = Calculator.calculate_withholding(payroll_record.gross_pay, employee.filing_status).round(2)
+    taxable_income = payroll_record.gross_pay.to_f - payroll_record.roth_retirement_payment.to_f
+    payroll_record.withholding_tax = Calculator.calculate_withholding(taxable_income, employee.filing_status).round(2)
   end
 
   def calculate_social_security
@@ -39,6 +41,11 @@ class PayrollCalculator
     payroll_record.retirement_payment = (payroll_record.gross_pay.to_f * (employee.retirement_rate.to_f / 100)).round(2)
   end
 
+  def calculate_roth_retirement_payment
+    # Calculate only if not provided explicitly
+    payroll_record.roth_retirement_payment ||= (payroll_record.gross_pay.to_f * (employee.roth_retirement_rate.to_f / 100)).round(2)
+  end
+
   def calculate_net_pay
     total_deductions = [
       payroll_record.withholding_tax,
@@ -46,7 +53,8 @@ class PayrollCalculator
       payroll_record.medicare_tax,
       payroll_record.loan_payment,
       payroll_record.insurance_payment,
-      payroll_record.retirement_payment
+      payroll_record.retirement_payment,
+      payroll_record.roth_retirement_payment
     ].map(&:to_f).sum
 
     payroll_record.net_pay = (payroll_record.gross_pay.to_f - total_deductions).round(2)

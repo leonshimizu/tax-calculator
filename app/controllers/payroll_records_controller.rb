@@ -27,27 +27,32 @@ class PayrollRecordsController < ApplicationController
       withholding_tax: @payroll_record.withholding_tax,
       social_security_tax: @payroll_record.social_security_tax,
       medicare_tax: @payroll_record.medicare_tax,
-      retirement_payment: @payroll_record.retirement_payment
+      retirement_payment: @payroll_record.retirement_payment,
+      roth_retirement_payment: @payroll_record.roth_retirement_payment,
+      total_deductions: @payroll_record.total_deductions
     }
   end
 
   # POST /companies/:company_id/employees/:employee_id/payroll_records
   def create
-    @payroll_record = @employee.payroll_records.build(processed_payroll_record_params)
-    payroll_calculator = PayrollCalculator.for(@employee, @payroll_record)
-    payroll_calculator.calculate
+    @payroll_record = @employee.payroll_records.new(payroll_record_params)
+
+    Rails.logger.debug "PayrollRecord Params: #{payroll_record_params.inspect}"
+    Rails.logger.debug "Before Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
 
     if @payroll_record.save
-      render json: @payroll_record, status: :created, location: company_employee_payroll_record_path(@company, @employee, @payroll_record)
+      Rails.logger.debug "After Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
+      redirect_to [@company, @employee], notice: 'Payroll record was successfully created.'
     else
-      render json: @payroll_record.errors, status: :unprocessable_entity
+      Rails.logger.error "Payroll Record Save Failed: #{@payroll_record.errors.full_messages.inspect}"
+      render :new
     end
   end
 
   # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create
     payroll_records_params = params.require(:payroll_records).map do |record|
-      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :gross_pay, :bonus)
+      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :gross_pay, :bonus, :retirement_payment, :roth_retirement_payment)
     end
 
     created_records = payroll_records_params.map do |record_params|
@@ -72,8 +77,10 @@ class PayrollRecordsController < ApplicationController
   # PATCH/PUT /companies/:company_id/employees/:employee_id/payroll_records/:id
   def update
     if @payroll_record.update(processed_payroll_record_params)
+      Rails.logger.debug "Updated PayrollRecord: #{@payroll_record.inspect}"
       render json: @payroll_record
     else
+      Rails.logger.error "Payroll Record Update Failed: #{@payroll_record.errors.full_messages.inspect}"
       render json: @payroll_record.errors, status: :unprocessable_entity
     end
   end
@@ -83,6 +90,7 @@ class PayrollRecordsController < ApplicationController
     if @payroll_record.destroy
       render json: { notice: 'Payroll record was successfully destroyed.' }
     else
+      Rails.logger.error "Payroll Record Destroy Failed: #{@payroll_record.errors.full_messages.inspect}"
       render json: { error: 'Error destroying payroll record.' }, status: :unprocessable_entity
     end
   end
@@ -106,7 +114,7 @@ class PayrollRecordsController < ApplicationController
   end
 
   def payroll_record_params
-    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, :gross_pay, :bonus)
+    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, :gross_pay, :bonus, :retirement_payment, :roth_retirement_payment)
   end
 
   def processed_payroll_record_params
@@ -124,6 +132,10 @@ class PayrollRecordsController < ApplicationController
       params[:overtime_hours_worked] = params[:overtime_hours_worked].to_f if params[:overtime_hours_worked].present?
       params.delete(:gross_pay)
     end
+
+    # Ensure roth_retirement_payment is processed properly if explicitly set
+    params[:roth_retirement_payment] = params[:roth_retirement_payment].to_f if params[:roth_retirement_payment].present?
+
     params
   end
 end

@@ -1,4 +1,3 @@
-# config/routes.rb
 Rails.application.routes.draw do
   # Define a separate route for batch processing within the context of a company
   post 'companies/:company_id/employees/batch/payroll_records', to: 'payroll_records#batch_create'
@@ -10,6 +9,11 @@ Rails.application.routes.draw do
   resources :companies do
     resources :employees do
       resources :payroll_records, only: [:index, :show, :create, :update, :destroy]
+
+      # Define collection route for file upload
+      collection do
+        post 'upload', to: 'employees#upload'
+      end
     end
 
     # Route to fetch all payroll records for a company

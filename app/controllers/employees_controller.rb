@@ -1,3 +1,4 @@
+# app/controllers/employees_controller.rb
 class EmployeesController < ApplicationController
   before_action :set_company
   before_action :set_employee, only: [:show, :update, :destroy]
@@ -42,7 +43,36 @@ class EmployeesController < ApplicationController
     year = params[:year].to_i || Time.current.year
     render json: employee.ytd_totals(year)
   end
+
+  def upload
+    employees_data = params[:employees]
   
+    employees_data.each do |employee_data|
+      # Skip any employee data that has missing required fields
+      next if employee_data['first_name'].blank? || employee_data['last_name'].blank? || employee_data['payroll_type'].blank? || employee_data['department'].blank? || employee_data['pay_rate'].blank?
+  
+      # Initialize employee without finding by ID since new employees will not have an ID
+      employee = @company.employees.find_or_initialize_by(
+        first_name: employee_data['first_name'], 
+        last_name: employee_data['last_name']
+      )
+  
+      # Assign attributes excluding any key that doesn't match the model attributes
+      employee.assign_attributes(employee_data.slice(*employee_params.keys))
+  
+      # Save employee if valid, else log the error
+      if employee.save
+        Rails.logger.info "Employee #{employee.first_name} #{employee.last_name} saved successfully."
+      else
+        Rails.logger.error "Failed to save employee: #{employee.errors.full_messages.join(', ')}"
+      end
+    end
+  
+    render json: { message: 'Employees uploaded successfully' }, status: :ok
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   private
 
   def set_company
@@ -59,7 +89,7 @@ class EmployeesController < ApplicationController
   def handle_not_found
     render json: { error: 'Employee not found.' }, status: :not_found
   end
-  
+
   def employee_params
     params.require(:employee).permit(:first_name, :last_name, :payroll_type, :department, :pay_rate, :gross_pay, :retirement_rate, :filing_status, :company_id)
   end

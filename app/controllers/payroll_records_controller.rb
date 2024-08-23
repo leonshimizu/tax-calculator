@@ -60,9 +60,17 @@ class PayrollRecordsController < ApplicationController
       unless employee
         render json: { error: "Employee with ID #{record_params[:employee_id]} not found in company." }, status: :not_found and return
       end
-      payroll_record = employee.payroll_records.new(process_payroll_record_params(record_params, employee))
+
+      # Adjust params based on payroll_type
+      processed_params = process_payroll_record_params(record_params, employee)
+
+      # Create payroll record with the processed params
+      payroll_record = employee.payroll_records.new(processed_params)
+
+      # Use the appropriate payroll calculator
       payroll_calculator = PayrollCalculator.for(employee, payroll_record)
       payroll_calculator.calculate
+
       payroll_record.save
       payroll_record
     end

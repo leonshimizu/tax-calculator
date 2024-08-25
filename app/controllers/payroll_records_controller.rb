@@ -60,43 +60,45 @@ class PayrollRecordsController < ApplicationController
 
   # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create
-    payroll_records_params = params.require(:payroll_records).map do |record|
-      record.permit(:employee_id, :date, :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :gross_pay, :bonus, :retirement_payment, :roth_retirement_payment)
-    end
-
-    created_records = payroll_records_params.map do |record_params|
-      employee = @company.employees.find_by(id: record_params[:employee_id])
-      unless employee
-        render json: { error: "Employee with ID #{record_params[:employee_id]} not found in company." }, status: :not_found and return
+    @company = Company.find(params[:company_id])
+    @payroll_records = []
+  
+    ActiveRecord::Base.transaction do
+      params[:payroll_records].each do |record_params|
+        employee = @company.employees.find(record_params[:employee_id])
+        payroll_record_params = record_params.permit(
+          :employee_id,
+          :date,
+          :hours_worked,
+          :overtime_hours_worked,
+          :reported_tips,
+          :loan_payment,
+          :insurance_payment,
+          :gross_pay,
+          :bonus,
+          :retirement_payment,
+          :roth_retirement_payment,
+          custom_columns_data: {} # Permit the custom columns data here
+        )
+        
+        payroll_record = PayrollRecord.new(payroll_record_params)
+        payroll_record.employee = employee
+  
+        if payroll_record.save
+          @payroll_records << payroll_record
+        else
+          raise ActiveRecord::Rollback # Rollback transaction if any record fails to save
+        end
       end
-
-      # Adjust params based on payroll_type
-      processed_params = process_payroll_record_params(record_params, employee)
-
-      # Create payroll record with the processed params
-      payroll_record = employee.payroll_records.new(processed_params)
-
-      # Set custom columns data
-      custom_columns_data = {}
-      @company.custom_columns.each do |column|
-        custom_columns_data[column.name] = record_params[column.name] if record_params[column.name]
-      end
-      payroll_record.custom_columns_data = custom_columns_data
-
-      # Use the appropriate payroll calculator
-      payroll_calculator = PayrollCalculator.for(employee, payroll_record)
-      payroll_calculator.calculate
-
-      payroll_record.save
-      payroll_record
     end
-
-    if created_records.all?(&:persisted?)
-      render json: created_records.map { |record| record.as_json(include: :employee) }, status: :created
+  
+    if @payroll_records.any?
+      render json: @payroll_records, status: :created
     else
-      render json: { errors: created_records.map { |record| record.errors.full_messages } }, status: :unprocessable_entity
+      render json: { error: 'Failed to create payroll records' }, status: :unprocessable_entity
     end
   end
+  
 
   # PATCH/PUT /companies/:company_id/employees/:employee_id/payroll_records/:id
   def update
@@ -143,12 +145,22 @@ class PayrollRecordsController < ApplicationController
   end
 
   def payroll_record_params
-    # Permit custom_columns_data as a hash with any keys
     params.require(:payroll_record).permit(
-      :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, 
-      :gross_pay, :bonus, :retirement_payment, :roth_retirement_payment, custom_columns_data: {}
+      :employee_id,
+      :date,
+      :hours_worked,
+      :overtime_hours_worked,
+      :reported_tips,
+      :loan_payment,
+      :insurance_payment,
+      :gross_pay,
+      :bonus,
+      :retirement_payment,
+      :roth_retirement_payment,
+      custom_columns_data: {} # Permit custom_columns_data as a hash
     )
   end
+  
 
   def processed_payroll_record_params
     process_payroll_record_params(payroll_record_params, @employee)

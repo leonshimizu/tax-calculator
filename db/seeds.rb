@@ -22,10 +22,10 @@ PayrollRecord.delete_all
 Employee.delete_all
 Company.delete_all
 
-COMPANY_COUNT.times do |i|
-  company = Company.create!(
-    name: "Company #{i + 1}"
-  )
+COMPANY_COUNT.times do
+  # Generate a random company name using Faker
+  company_name = Faker::Company.unique.name
+  company = Company.create!(name: company_name)
 
   puts "Created #{company.name}"
 

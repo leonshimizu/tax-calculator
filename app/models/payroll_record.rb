@@ -62,8 +62,8 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_total_deductions
-    # Sum up all the custom column values for deductions
-    custom_column_deductions = custom_columns_data.values.map(&:to_f).sum
+    # Sum up all the custom column values for deductions and ensure custom_columns_data is not nil and is a hash
+    custom_column_deductions = custom_columns_data.is_a?(Hash) ? custom_columns_data.values.map(&:to_f).sum : 0.0
     self.total_deductions = [
       withholding_tax,
       social_security_tax,

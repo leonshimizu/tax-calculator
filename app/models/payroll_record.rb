@@ -37,7 +37,6 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_gross_pay
-    # Ensure this method exists and handles gross pay calculation
     overtime_pay = overtime_hours_worked.to_f * employee.pay_rate * 1.5
     self.gross_pay = ((hours_worked * employee.pay_rate) + overtime_pay + reported_tips.to_f).round(2)
   end
@@ -64,6 +63,7 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_total_deductions
+    custom_column_deductions = employee.company.custom_columns.sum { |column| self[column.name].to_f }
     self.total_deductions = [
       withholding_tax,
       social_security_tax,
@@ -71,7 +71,8 @@ class PayrollRecord < ApplicationRecord
       loan_payment,
       insurance_payment,
       retirement_payment,
-      roth_retirement_payment
+      roth_retirement_payment,
+      custom_column_deductions
     ].map(&:to_f).sum.round(2)
   end
 

@@ -34,20 +34,27 @@ class PayrollRecordsController < ApplicationController
   end
 
   # POST /companies/:company_id/employees/:employee_id/payroll_records
-  def create
-    @payroll_record = @employee.payroll_records.new(payroll_record_params)
+def create
+  @payroll_record = @employee.payroll_records.new(payroll_record_params)
 
-    Rails.logger.debug "PayrollRecord Params: #{payroll_record_params.inspect}"
-    Rails.logger.debug "Before Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
+  custom_columns = @company.custom_columns
 
-    if @payroll_record.save
-      Rails.logger.debug "After Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
-      redirect_to [@company, @employee], notice: 'Payroll record was successfully created.'
-    else
-      Rails.logger.error "Payroll Record Save Failed: #{@payroll_record.errors.full_messages.inspect}"
-      render :new
-    end
+  # Include custom columns in payroll calculations
+  custom_columns.each do |column|
+    @payroll_record[column.name] = params[:payroll_record][column.name]
   end
+
+  Rails.logger.debug "PayrollRecord Params: #{payroll_record_params.inspect}"
+  Rails.logger.debug "Before Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
+
+  if @payroll_record.save
+    Rails.logger.debug "After Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
+    redirect_to [@company, @employee], notice: 'Payroll record was successfully created.'
+  else
+    Rails.logger.error "Payroll Record Save Failed: #{@payroll_record.errors.full_messages.inspect}"
+    render :new
+  end
+end
 
   # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create

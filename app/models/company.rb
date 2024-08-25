@@ -1,6 +1,7 @@
 class Company < ApplicationRecord
   has_many :employees, dependent: :destroy
   has_many :payroll_records, through: :employees
+  has_many :custom_columns, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
 

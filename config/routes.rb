@@ -16,6 +16,9 @@ Rails.application.routes.draw do
       end
     end
 
+    # Routes for managing custom columns
+    resources :custom_columns, only: [:index, :create, :destroy]
+
     # Route to fetch all payroll records for a company
     get 'payroll_records', to: 'payroll_records#index'
 
@@ -40,3 +43,4 @@ Rails.application.routes.draw do
   get 'net_pay/show', to: 'net_pay#show'
   root 'net_pay#show'
 end
+

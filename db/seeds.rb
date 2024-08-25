@@ -10,58 +10,85 @@
 
 # db/seeds.rb
 
+require 'faker'
+
+# Constants
+EMPLOYEE_COUNT = 30
+PAYROLL_RECORDS_COUNT = 30
+COMPANY_COUNT = 5
+
 # Clear existing data
-PayrollRecord.destroy_all
-Employee.destroy_all
-Company.destroy_all
+PayrollRecord.delete_all
+Employee.delete_all
+Company.delete_all
 
-# Create companies
-companies = Company.create!([
-  { name: 'Tech Innovators Inc.', },
-  { name: 'Green Solutions Ltd.', },
-  { name: 'Health First Corp.' }
-])
+COMPANY_COUNT.times do |i|
+  company = Company.create!(
+    name: "Company #{i + 1}"
+  )
 
-# Create employees
-employees = []
+  puts "Created #{company.name}"
 
-employees += Employee.create!([
-  { first_name: 'John', last_name: 'Doe', payroll_type: 'hourly', department: 'front_of_house', pay_rate: 25.00, retirement_rate: 5.0, filing_status: 'single', company: companies[0] },
-  { first_name: 'Jane', last_name: 'Smith', payroll_type: 'hourly', department: 'back_of_house', pay_rate: 22.00, retirement_rate: 6.0, filing_status: 'married', company: companies[0] },
-  { first_name: 'Michael', last_name: 'Johnson', payroll_type: 'salary', department: 'salary', retirement_rate: 4.0, filing_status: 'head_of_household', company: companies[0] },
-  { first_name: 'Emily', last_name: 'Davis', payroll_type: 'salary', department: 'salary', retirement_rate: 7.0, filing_status: 'single', company: companies[1] },
-  { first_name: 'David', last_name: 'Brown', payroll_type: 'hourly', department: 'administration', pay_rate: 30.00, retirement_rate: 5.5, filing_status: 'married', company: companies[1] },
-  { first_name: 'Sarah', last_name: 'Miller', payroll_type: 'salary', department: 'salary', retirement_rate: 6.0, filing_status: 'single', company: companies[2] },
-  { first_name: 'James', last_name: 'Wilson', payroll_type: 'hourly', department: 'front_of_house', pay_rate: 28.00, retirement_rate: 3.5, filing_status: 'married', company: companies[2] },
-  { first_name: 'Linda', last_name: 'Martinez', payroll_type: 'hourly', department: 'back_of_house', pay_rate: 24.00, retirement_rate: 4.5, filing_status: 'head_of_household', company: companies[2] }
-])
+  EMPLOYEE_COUNT.times do
+    # Randomly choose payroll type
+    payroll_type = ['hourly', 'salary'].sample
+    department = payroll_type == 'hourly' ? ['front_of_house', 'back_of_house'].sample : 'salary'
 
-# Create payroll records for employees
-payroll_records = []
+    # Generate employee attributes based on payroll type
+    employee_attrs = {
+      first_name: Faker::Name.first_name,
+      last_name: Faker::Name.last_name,
+      filing_status: ['single', 'married', 'head_of_household'].sample,
+      department: department,
+      payroll_type: payroll_type,
+      retirement_rate: Faker::Number.between(from: 0, to: 10),
+      roth_retirement_rate: Faker::Number.between(from: 0, to: 10)
+    }
 
-employees.each do |employee|
-  10.times do
-    if employee.payroll_type == 'hourly'
-      payroll_records << PayrollRecord.create!(
-        employee: employee,
-        date: Faker::Date.backward(days: 365),
-        hours_worked: rand(30..50),
-        overtime_hours_worked: rand(0..10),
-        reported_tips: rand(50..200),
-        loan_payment: rand(50..100),
-        insurance_payment: rand(100..200)
-      )
-    else
-      payroll_records << PayrollRecord.create!(
-        employee: employee,
-        date: Faker::Date.backward(days: 365),
-        gross_pay: rand(4000..6000),
-        bonus: rand(500..1000),
-        loan_payment: rand(50..100),
-        insurance_payment: rand(100..200)
-      )
+    # Set pay_rate for hourly employees
+    employee_attrs[:pay_rate] = Faker::Number.decimal(l_digits: 2, r_digits: 2) if payroll_type == 'hourly'
+
+    employee = company.employees.create!(employee_attrs)
+
+    # Create payroll records for the employee
+    PAYROLL_RECORDS_COUNT.times do
+      if payroll_type == 'hourly'
+        employee.payroll_records.create!(
+          date: Faker::Date.between(from: 2.years.ago, to: Date.today),
+          hours_worked: Faker::Number.between(from: 0.01, to: 80), # Ensure hours_worked is at least 0.01
+          overtime_hours_worked: Faker::Number.between(from: 0, to: 20),
+          reported_tips: Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          loan_payment: Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          insurance_payment: Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          gross_pay: nil, # Not used for hourly employees
+          net_pay: nil, # Will be calculated
+          withholding_tax: nil, # Will be calculated
+          social_security_tax: nil, # Will be calculated
+          medicare_tax: nil, # Will be calculated
+          retirement_payment: nil, # Will be calculated
+          roth_retirement_payment: nil # Will be calculated
+        )
+      else
+        employee.payroll_records.create!(
+          date: Faker::Date.between(from: 2.years.ago, to: Date.today),
+          hours_worked: nil, # Not used for salary employees
+          overtime_hours_worked: nil, # Not used for salary employees
+          reported_tips: nil, # Not used for salary employees
+          loan_payment: Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          insurance_payment: Faker::Number.decimal(l_digits: 2, r_digits: 2),
+          gross_pay: Faker::Number.decimal(l_digits: 4, r_digits: 2), # Set gross_pay for salary employees
+          net_pay: nil, # Will be calculated
+          withholding_tax: nil, # Will be calculated
+          social_security_tax: nil, # Will be calculated
+          medicare_tax: nil, # Will be calculated
+          retirement_payment: nil, # Will be calculated
+          roth_retirement_payment: nil # Will be calculated
+        )
+      end
     end
+
+    puts "Created employee: #{employee.first_name} #{employee.last_name} (#{employee.payroll_type})"
   end
 end
 
-puts "Seeded #{Company.count} companies, #{Employee.count} employees, and #{PayrollRecord.count} payroll records."
+puts "Seeding completed!"

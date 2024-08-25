@@ -91,6 +91,6 @@ class EmployeesController < ApplicationController
   end
 
   def employee_params
-    params.require(:employee).permit(:first_name, :last_name, :payroll_type, :department, :pay_rate, :gross_pay, :retirement_rate, :filing_status, :company_id)
-  end
+    params.require(:employee).permit(:first_name, :last_name, :pay_rate, :retirement_rate, :department, :filing_status, :payroll_type, :roth_retirement_rate, :company_id)
+  end  
 end

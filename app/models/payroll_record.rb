@@ -1,4 +1,3 @@
-# app/models/payroll_record.rb
 class PayrollRecord < ApplicationRecord
   belongs_to :employee
 
@@ -63,7 +62,8 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_total_deductions
-    custom_column_deductions = employee.company.custom_columns.sum { |column| self[column.name].to_f }
+    # Sum up all the custom column values for deductions
+    custom_column_deductions = custom_columns_data.values.map(&:to_f).sum
     self.total_deductions = [
       withholding_tax,
       social_security_tax,

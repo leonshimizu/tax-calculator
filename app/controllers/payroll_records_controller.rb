@@ -1,3 +1,4 @@
+# app/controllers/payroll_records_controller.rb
 class PayrollRecordsController < ApplicationController
   before_action :set_company
   before_action :set_employee, except: :batch_create
@@ -29,32 +30,33 @@ class PayrollRecordsController < ApplicationController
       medicare_tax: @payroll_record.medicare_tax,
       retirement_payment: @payroll_record.retirement_payment,
       roth_retirement_payment: @payroll_record.roth_retirement_payment,
-      total_deductions: @payroll_record.total_deductions
+      total_deductions: @payroll_record.total_deductions,
+      custom_columns: @payroll_record.custom_columns_data
     }
   end
 
   # POST /companies/:company_id/employees/:employee_id/payroll_records
-def create
-  @payroll_record = @employee.payroll_records.new(payroll_record_params)
+  def create
+    @payroll_record = @employee.payroll_records.new(payroll_record_params)
 
-  custom_columns = @company.custom_columns
+    # Extract custom columns from params and assign to custom_columns_data
+    custom_columns = @company.custom_columns.pluck(:name)
+    # Ensure custom_columns_data is permitted as a hash of arbitrary keys/values
+    custom_data = params.require(:payroll_record).fetch(:custom_columns_data, {}).permit(custom_columns.map(&:to_sym))
+    @payroll_record.custom_columns_data = custom_data.to_h # Convert permitted parameters to hash
 
-  # Include custom columns in payroll calculations
-  custom_columns.each do |column|
-    @payroll_record[column.name] = params[:payroll_record][column.name]
+    Rails.logger.debug "PayrollRecord Params: #{payroll_record_params.inspect}"
+    Rails.logger.debug "Before Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
+    Rails.logger.debug "Custom Columns Data: #{custom_data.inspect}"
+
+    if @payroll_record.save
+      Rails.logger.debug "After Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
+      redirect_to [@company, @employee], notice: 'Payroll record was successfully created.'
+    else
+      Rails.logger.error "Payroll Record Save Failed: #{@payroll_record.errors.full_messages.inspect}"
+      render :new
+    end
   end
-
-  Rails.logger.debug "PayrollRecord Params: #{payroll_record_params.inspect}"
-  Rails.logger.debug "Before Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
-
-  if @payroll_record.save
-    Rails.logger.debug "After Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
-    redirect_to [@company, @employee], notice: 'Payroll record was successfully created.'
-  else
-    Rails.logger.error "Payroll Record Save Failed: #{@payroll_record.errors.full_messages.inspect}"
-    render :new
-  end
-end
 
   # POST /companies/:company_id/employees/batch/payroll_records
   def batch_create
@@ -74,6 +76,13 @@ end
       # Create payroll record with the processed params
       payroll_record = employee.payroll_records.new(processed_params)
 
+      # Set custom columns data
+      custom_columns_data = {}
+      @company.custom_columns.each do |column|
+        custom_columns_data[column.name] = record_params[column.name] if record_params[column.name]
+      end
+      payroll_record.custom_columns_data = custom_columns_data
+
       # Use the appropriate payroll calculator
       payroll_calculator = PayrollCalculator.for(employee, payroll_record)
       payroll_calculator.calculate
@@ -91,7 +100,12 @@ end
 
   # PATCH/PUT /companies/:company_id/employees/:employee_id/payroll_records/:id
   def update
-    if @payroll_record.update(processed_payroll_record_params)
+    custom_columns_data = {}
+    @company.custom_columns.each do |column|
+      custom_columns_data[column.name] = params[:payroll_record][column.name] if params[:payroll_record][column.name]
+    end
+
+    if @payroll_record.update(processed_payroll_record_params.merge(custom_columns_data: custom_columns_data))
       Rails.logger.debug "Updated PayrollRecord: #{@payroll_record.inspect}"
       render json: @payroll_record
     else
@@ -129,7 +143,11 @@ end
   end
 
   def payroll_record_params
-    params.require(:payroll_record).permit(:hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, :gross_pay, :bonus, :retirement_payment, :roth_retirement_payment)
+    # Permit custom_columns_data as a hash with any keys
+    params.require(:payroll_record).permit(
+      :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment, :insurance_payment, :date, 
+      :gross_pay, :bonus, :retirement_payment, :roth_retirement_payment, custom_columns_data: {}
+    )
   end
 
   def processed_payroll_record_params

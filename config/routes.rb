@@ -33,6 +33,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # This line ensures that any unknown route serves the index.html
+  get '*path', to: 'static#index', constraints: ->(req) { req.format.html? }
+
   get 'calculate', to: 'tax_calculator#calculate'
   get 'net_pay/show', to: 'net_pay#show'
   root 'net_pay#show'

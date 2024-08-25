@@ -14,7 +14,6 @@ require 'faker'
 
 # Constants
 EMPLOYEE_COUNT = 30
-PAYROLL_RECORDS_COUNT = 30
 COMPANY_COUNT = 5
 
 # Clear existing data
@@ -22,10 +21,19 @@ PayrollRecord.delete_all
 Employee.delete_all
 Company.delete_all
 
+# Find the first Thursday of 2023
+start_date = Date.new(2023, 1, 1)
+start_date += (4 - start_date.wday) % 7 # Adjust to the first Thursday of 2023
+
+# Calculate the most recent past Thursday
+end_date = Date.today
+end_date -= (end_date.wday - 4) % 7 # Adjust to the last Thursday
+
+# Create companies with realistic American names
 COMPANY_COUNT.times do
-  # Generate a random company name using Faker
-  company_name = Faker::Company.unique.name
-  company = Company.create!(name: company_name)
+  company = Company.create!(
+    name: Faker::Company.unique.name
+  )
 
   puts "Created #{company.name}"
 
@@ -50,11 +58,11 @@ COMPANY_COUNT.times do
 
     employee = company.employees.create!(employee_attrs)
 
-    # Create payroll records for the employee
-    PAYROLL_RECORDS_COUNT.times do
+    # Generate bi-weekly payroll records from the start of 2023 until the most recent past Thursday
+    (start_date..end_date).step(14).each do |pay_date|
       if payroll_type == 'hourly'
         employee.payroll_records.create!(
-          date: Faker::Date.between(from: 2.years.ago, to: Date.today),
+          date: pay_date,
           hours_worked: Faker::Number.between(from: 0.01, to: 80), # Ensure hours_worked is at least 0.01
           overtime_hours_worked: Faker::Number.between(from: 0, to: 20),
           reported_tips: Faker::Number.decimal(l_digits: 2, r_digits: 2),
@@ -70,7 +78,7 @@ COMPANY_COUNT.times do
         )
       else
         employee.payroll_records.create!(
-          date: Faker::Date.between(from: 2.years.ago, to: Date.today),
+          date: pay_date,
           hours_worked: nil, # Not used for salary employees
           overtime_hours_worked: nil, # Not used for salary employees
           reported_tips: nil, # Not used for salary employees

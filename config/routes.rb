@@ -10,7 +10,7 @@ Rails.application.routes.draw do
     resources :employees do
       resources :payroll_records, only: [:index, :show, :create, :update, :destroy]
 
-      # Define collection route for file upload
+      # Define collection route for employee file upload
       collection do
         post 'upload', to: 'employees#upload'
       end
@@ -21,6 +21,13 @@ Rails.application.routes.draw do
 
     # Route to fetch all payroll records for a company
     get 'payroll_records', to: 'payroll_records#index'
+
+    # Route for batch payroll record upload within a company context
+    resources :payroll_records, only: [] do
+      collection do
+        post 'upload', to: 'payroll_records#upload'
+      end
+    end
 
     # Routes for YTD totals
     member do

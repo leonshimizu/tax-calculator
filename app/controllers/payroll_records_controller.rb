@@ -126,7 +126,66 @@ class PayrollRecordsController < ApplicationController
     end
   end
 
+  def upload
+    payroll_data = params[:payroll_data]
+
+    payroll_data.each do |entry|
+      first_name = entry['first_name']
+      last_name = entry['last_name']
+      
+      employee = @company.employees.find_by(first_name: first_name, last_name: last_name)
+
+      if employee
+        # Check payroll_type and create a PayrollRecord accordingly
+        if employee.payroll_type == 'hourly'
+          create_hourly_payroll_record(employee, entry)
+        elsif employee.payroll_type == 'salary'
+          create_salary_payroll_record(employee, entry)
+        else
+          Rails.logger.error "Unknown payroll type for employee #{employee.full_name}"
+        end
+      else
+        Rails.logger.error "Employee #{first_name} #{last_name} not found."
+      end
+    end
+
+    render json: { message: 'Payroll records uploaded successfully' }, status: :ok
+  rescue StandardError => e
+    Rails.logger.error "Error uploading payroll records: #{e.message}"
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   private
+
+  def create_hourly_payroll_record(employee, entry)
+    payroll_record = employee.payroll_records.new(
+      date: Date.today,
+      hours_worked: entry['hours_worked'],
+      overtime_hours_worked: entry['overtime_hours_worked'],
+      reported_tips: entry['reported_tips'],
+      loan_payment: entry['loan_payment'],
+      insurance_payment: entry['insurance_payment']
+    )
+    
+    unless payroll_record.save
+      Rails.logger.error "Failed to save payroll record for employee #{employee.full_name}: #{payroll_record.errors.full_messages.join(', ')}"
+    end
+  end
+
+  def create_salary_payroll_record(employee, entry)
+    payroll_record = employee.payroll_records.new(
+      date: Date.today,
+      gross_pay: entry['gross_pay'],
+      bonus: entry['bonus'],
+      loan_payment: entry['loan_payment'],
+      insurance_payment: entry['insurance_payment'],
+      retirement_payment: entry['retirement_payment']
+    )
+    
+    unless payroll_record.save
+      Rails.logger.error "Failed to save payroll record for employee #{employee.full_name}: #{payroll_record.errors.full_messages.join(', ')}"
+    end
+  end
 
   def set_company
     @company = Company.find(params[:company_id])

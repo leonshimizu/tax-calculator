@@ -14,12 +14,20 @@ require 'faker'
 
 # Constants
 EMPLOYEE_COUNT = 30
-COMPANY_COUNT = 5
 
 # Clear existing data
 PayrollRecord.delete_all
 Employee.delete_all
 Company.delete_all
+
+# Specified company names
+company_names = [
+  'Aire Services',
+  'Hafaloha',
+  'Stax',
+  'Ambros Inc.',
+  'Shimizu Tax Company'
+]
 
 # Find the first Thursday of 2023
 start_date = Date.new(2023, 1, 1)
@@ -29,10 +37,10 @@ start_date += (4 - start_date.wday) % 7 # Adjust to the first Thursday of 2023
 end_date = Date.today
 end_date -= (end_date.wday - 4) % 7 # Adjust to the last Thursday
 
-# Create companies with realistic American names
-COMPANY_COUNT.times do
+# Create companies with the specified names
+company_names.each do |company_name|
   company = Company.create!(
-    name: Faker::Company.unique.name
+    name: company_name
   )
 
   puts "Created #{company.name}"

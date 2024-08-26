@@ -134,7 +134,6 @@ class PayrollRecordsController < ApplicationController
       last_name = entry['last_name']
       
       employee = @company.employees.find_by(first_name: first_name, last_name: last_name)
-
       if employee
         # Check payroll_type and create a PayrollRecord accordingly
         if employee.payroll_type == 'hourly'
@@ -179,7 +178,7 @@ class PayrollRecordsController < ApplicationController
       bonus: entry['bonus'],
       loan_payment: entry['loan_payment'],
       insurance_payment: entry['insurance_payment'],
-      retirement_payment: entry['retirement_payment']
+      roth_retirement_payment: entry['roth_retirement_payment']
     )
     
     unless payroll_record.save

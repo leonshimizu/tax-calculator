@@ -29,6 +29,9 @@ Rails.application.routes.draw do
       end
     end
 
+    # Route for uploading payroll master file
+    post 'payroll_master_file/upload', to: 'files#upload_files' # New route for payroll master file upload
+
     # Routes for YTD totals
     member do
       get 'department_ytd_totals', to: 'companies#department_ytd_totals'
@@ -42,6 +45,9 @@ Rails.application.routes.draw do
       get 'ytd_totals', to: 'employees#ytd_totals'
     end
   end
+
+  # New route for file upload at the root level
+  post 'api/upload_files', to: 'files#upload_files'
 
   # This line ensures that any unknown route serves the index.html
   get '*path', to: 'static#index', constraints: ->(req) { req.format.html? }

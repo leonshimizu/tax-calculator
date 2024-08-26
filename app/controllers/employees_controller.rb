@@ -101,9 +101,16 @@ class EmployeesController < ApplicationController
 
   def employee_params
     params.require(:employee).permit(
-      :first_name, :last_name, :payroll_type, :department, :pay_rate,
-      :hours_worked, :overtime_hours_worked, :reported_tips, :loan_payment,
-      :insurance_payment, :retirement_payment, :roth_retirement_payment, :bonus
+      :id, 
+      :filing_status, 
+      :pay_rate, 
+      :retirement_rate, 
+      :department, 
+      :first_name, 
+      :last_name, 
+      :company_id, 
+      :payroll_type, 
+      :roth_retirement_rate
     )
   end
 

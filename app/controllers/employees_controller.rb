@@ -52,8 +52,12 @@ class EmployeesController < ApplicationController
       permitted_data = employee_data.permit(
         :first_name, :last_name, :payroll_type, :department, :pay_rate,
         :retirement_rate, :roth_retirement_rate, :filing_status
-      ).to_h  # Convert to a regular Ruby hash
+      ).to_h
 
+      # Adjust the retirement_rate if necessary
+      permitted_data[:retirement_rate] = adjust_retirement_rate(permitted_data[:retirement_rate])
+      permitted_data[:roth_retirement_rate] = adjust_retirement_rate(permitted_data[:roth_retirement_rate]) if permitted_data[:roth_retirement_rate]
+  
       # Find or initialize an employee by first and last name
       employee = @company.employees.find_or_initialize_by(
         first_name: permitted_data[:first_name],
@@ -63,13 +67,13 @@ class EmployeesController < ApplicationController
       # Check if the existing employee needs an update
       if employee.new_record? || attributes_need_update?(employee, permitted_data)
         employee.assign_attributes(permitted_data)
-  
+
         unless employee.save
           Rails.logger.error "Failed to save employee #{employee.first_name} #{employee.last_name}: #{employee.errors.full_messages.join(', ')}"
         end
       end
     end
-
+  
     render json: { message: 'Employees uploaded successfully' }, status: :ok
   rescue StandardError => e
     Rails.logger.error "Error uploading employees: #{e.message}"
@@ -77,6 +81,15 @@ class EmployeesController < ApplicationController
   end
 
   private
+  
+  def adjust_retirement_rate(rate)
+    rate = rate.to_f
+    if rate > 0 && rate < 1
+      rate * 100  # Convert decimal to percentage
+    else
+      rate
+    end
+  end
 
   def attributes_need_update?(employee, permitted_data)
     # Convert permitted_data to a hash before comparing

@@ -138,9 +138,9 @@ class PayrollRecordsController < ApplicationController
       if employee
         # Check payroll_type and create a PayrollRecord accordingly
         if employee.payroll_type == 'hourly'
-          create_hourly_payroll_record(employee, entry)
+          create_hourly_payroll_record(employee, entry, params[:payroll_date]) # Pass payroll_date
         elsif employee.payroll_type == 'salary'
-          create_salary_payroll_record(employee, entry)
+          create_salary_payroll_record(employee, entry, params[:payroll_date]) # Pass payroll_date
         else
           Rails.logger.error "Unknown payroll type for employee #{employee.full_name}"
         end
@@ -157,9 +157,9 @@ class PayrollRecordsController < ApplicationController
 
   private
 
-  def create_hourly_payroll_record(employee, entry)
+  def create_hourly_payroll_record(employee, entry, payroll_date)
     payroll_record = employee.payroll_records.new(
-      date: Date.today,
+      date: payroll_date, # Use the provided payroll date
       hours_worked: entry['hours_worked'],
       overtime_hours_worked: entry['overtime_hours_worked'],
       reported_tips: entry['reported_tips'],
@@ -171,10 +171,10 @@ class PayrollRecordsController < ApplicationController
       Rails.logger.error "Failed to save payroll record for employee #{employee.full_name}: #{payroll_record.errors.full_messages.join(', ')}"
     end
   end
-
-  def create_salary_payroll_record(employee, entry)
+  
+  def create_salary_payroll_record(employee, entry, payroll_date)
     payroll_record = employee.payroll_records.new(
-      date: Date.today,
+      date: payroll_date, # Use the provided payroll date
       gross_pay: entry['gross_pay'],
       bonus: entry['bonus'],
       loan_payment: entry['loan_payment'],

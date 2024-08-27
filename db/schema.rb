@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_27_152432) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_27_182518) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_152432) do
     t.boolean "include_in_payroll", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_deduction", default: true, null: false
     t.index ["company_id"], name: "index_custom_columns_on_company_id"
   end
 
@@ -65,6 +66,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_152432) do
     t.decimal "total_deductions", precision: 12, scale: 3, default: "0.0"
     t.decimal "roth_retirement_payment"
     t.jsonb "custom_columns_data"
+    t.decimal "total_additions"
     t.index ["employee_id"], name: "index_payroll_records_on_employee_id"
   end
 

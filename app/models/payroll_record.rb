@@ -23,7 +23,7 @@ class PayrollRecord < ApplicationRecord
 
   def update_payroll_details
     if employee.payroll_type == 'hourly'
-      calculate_gross_pay # Only calculate gross pay for hourly employees
+      calculate_gross_pay
     end
 
     calculate_withholding
@@ -31,7 +31,7 @@ class PayrollRecord < ApplicationRecord
     calculate_medicare
     calculate_retirement_payment
     calculate_roth_retirement_payment if roth_retirement_payment.nil? || roth_retirement_payment == 0.0
-    calculate_total_deductions
+    calculate_total_deductions_and_additions
     calculate_net_pay
   end
 
@@ -61,9 +61,24 @@ class PayrollRecord < ApplicationRecord
     self.medicare_tax = Calculator.calculate_medicare(self.gross_pay).round(2)
   end
 
-  def calculate_total_deductions
-    # Sum up all the custom column values for deductions and ensure custom_columns_data is not nil and is a hash
-    custom_column_deductions = custom_columns_data.is_a?(Hash) ? custom_columns_data.values.map(&:to_f).sum : 0.0
+  def calculate_total_deductions_and_additions
+    if custom_columns_data.is_a?(Hash)
+      # Access company through employee
+      company = employee.company
+  
+      # Use company to find deductions and additions
+      custom_column_deductions = custom_columns_data.select do |name, _|
+        company.custom_columns.find_by(name: name)&.is_deduction?
+      end.values.map(&:to_f).sum
+  
+      custom_column_additions = custom_columns_data.reject do |name, _|
+        company.custom_columns.find_by(name: name)&.is_deduction?
+      end.values.map(&:to_f).sum
+    else
+      custom_column_deductions = 0.0
+      custom_column_additions = 0.0
+    end
+  
     self.total_deductions = [
       withholding_tax,
       social_security_tax,
@@ -74,9 +89,11 @@ class PayrollRecord < ApplicationRecord
       roth_retirement_payment,
       custom_column_deductions
     ].map(&:to_f).sum.round(2)
+  
+    self.total_additions = custom_column_additions.round(2)
   end
 
   def calculate_net_pay
-    self.net_pay = (self.gross_pay.to_f - self.total_deductions).round(2)
+    self.net_pay = (self.gross_pay.to_f - self.total_deductions + self.total_additions).round(2)
   end
 end

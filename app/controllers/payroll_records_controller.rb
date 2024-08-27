@@ -31,6 +31,7 @@ class PayrollRecordsController < ApplicationController
       retirement_payment: @payroll_record.retirement_payment,
       roth_retirement_payment: @payroll_record.roth_retirement_payment,
       total_deductions: @payroll_record.total_deductions,
+      total_additions: @payroll_record.total_additions,
       custom_columns: @payroll_record.custom_columns_data
     }
   end
@@ -39,21 +40,13 @@ class PayrollRecordsController < ApplicationController
   def create
     @payroll_record = @employee.payroll_records.new(payroll_record_params)
 
-    # Extract custom columns from params and assign to custom_columns_data
     custom_columns = @company.custom_columns.pluck(:name)
-    # Ensure custom_columns_data is permitted as a hash of arbitrary keys/values
     custom_data = params.require(:payroll_record).fetch(:custom_columns_data, {}).permit(custom_columns.map(&:to_sym))
-    @payroll_record.custom_columns_data = custom_data.to_h # Convert permitted parameters to hash
-
-    Rails.logger.debug "PayrollRecord Params: #{payroll_record_params.inspect}"
-    Rails.logger.debug "Before Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
-    Rails.logger.debug "Custom Columns Data: #{custom_data.inspect}"
+    @payroll_record.custom_columns_data = custom_data.to_h
 
     if @payroll_record.save
-      Rails.logger.debug "After Save - Roth Retirement Payment: #{@payroll_record.roth_retirement_payment.inspect}"
       redirect_to [@company, @employee], notice: 'Payroll record was successfully created.'
     else
-      Rails.logger.error "Payroll Record Save Failed: #{@payroll_record.errors.full_messages.inspect}"
       render :new
     end
   end
@@ -62,7 +55,7 @@ class PayrollRecordsController < ApplicationController
   def batch_create
     @company = Company.find(params[:company_id])
     @payroll_records = []
-  
+
     ActiveRecord::Base.transaction do
       params[:payroll_records].each do |record_params|
         employee = @company.employees.find(record_params[:employee_id])
@@ -78,12 +71,12 @@ class PayrollRecordsController < ApplicationController
           :bonus,
           :retirement_payment,
           :roth_retirement_payment,
-          custom_columns_data: {} # Permit the custom columns data here
+          custom_columns_data: {} # Permit custom columns data here
         )
-        
+
         payroll_record = PayrollRecord.new(payroll_record_params)
         payroll_record.employee = employee
-  
+
         if payroll_record.save
           @payroll_records << payroll_record
         else
@@ -91,7 +84,7 @@ class PayrollRecordsController < ApplicationController
         end
       end
     end
-  
+
     if @payroll_records.any?
       render json: @payroll_records, status: :created
     else
@@ -108,10 +101,8 @@ class PayrollRecordsController < ApplicationController
     end
 
     if @payroll_record.update(processed_payroll_record_params.merge(custom_columns_data: custom_columns_data))
-      Rails.logger.debug "Updated PayrollRecord: #{@payroll_record.inspect}"
       render json: @payroll_record
     else
-      Rails.logger.error "Payroll Record Update Failed: #{@payroll_record.errors.full_messages.inspect}"
       render json: @payroll_record.errors, status: :unprocessable_entity
     end
   end
@@ -215,10 +206,12 @@ class PayrollRecordsController < ApplicationController
       :bonus,
       :retirement_payment,
       :roth_retirement_payment,
-      custom_columns_data: {} # Permit custom_columns_data as a hash
+      :total_additions,
+      :total_deductions,
+      custom_columns_data: {}
     )
   end
-  
+
 
   def processed_payroll_record_params
     process_payroll_record_params(payroll_record_params, @employee)
@@ -240,5 +233,10 @@ class PayrollRecordsController < ApplicationController
     params[:roth_retirement_payment] = params[:roth_retirement_payment].to_f if params[:roth_retirement_payment].present?
 
     params
+  end
+
+  # Method to handle not found exceptions
+  def handle_not_found
+    render json: { error: 'Record not found.' }, status: :not_found
   end
 end

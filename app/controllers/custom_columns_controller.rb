@@ -45,6 +45,6 @@ class CustomColumnsController < ApplicationController
   end
 
   def custom_column_params
-    params.require(:custom_column).permit(:name, :data_type, :include_in_payroll)
+    params.require(:custom_column).permit(:name, :data_type, :include_in_payroll, :is_deduction)
   end
 end

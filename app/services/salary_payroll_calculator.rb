@@ -7,6 +7,7 @@ class SalaryPayrollCalculator < PayrollCalculator
     calculate_withholding
     calculate_social_security
     calculate_medicare
+    calculate_total_deductions
     calculate_net_pay
   end
 end

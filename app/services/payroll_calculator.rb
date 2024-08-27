@@ -46,7 +46,10 @@ class PayrollCalculator
     payroll_record.roth_retirement_payment ||= (payroll_record.gross_pay.to_f * (employee.roth_retirement_rate.to_f / 100)).round(2)
   end
 
-  def calculate_net_pay
+  def calculate_total_deductions
+    # Calculate total deductions, including custom deductions
+    custom_deductions = payroll_record.custom_columns_data.select { |_, value| value[:is_deduction] }.values.map(&:to_f).sum
+
     total_deductions = [
       payroll_record.withholding_tax,
       payroll_record.social_security_tax,
@@ -54,9 +57,18 @@ class PayrollCalculator
       payroll_record.loan_payment,
       payroll_record.insurance_payment,
       payroll_record.retirement_payment,
-      payroll_record.roth_retirement_payment
+      payroll_record.roth_retirement_payment,
+      custom_deductions
     ].map(&:to_f).sum
 
-    payroll_record.net_pay = (payroll_record.gross_pay.to_f - total_deductions).round(2)
+    payroll_record.total_deductions = total_deductions.round(2)
+  end
+
+  def calculate_net_pay
+    # Calculate total additions, including custom additions
+    custom_additions = payroll_record.custom_columns_data.select { |_, value| !value[:is_deduction] }.values.map(&:to_f).sum
+
+    # Recalculate net pay considering both additions and deductions
+    payroll_record.net_pay = (payroll_record.gross_pay.to_f + custom_additions - payroll_record.total_deductions).round(2)
   end
 end

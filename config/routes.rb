@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  post "/users" => "users#create"
+  post "/sessions" => "sessions#create"
+
   # Define a separate route for batch processing within the context of a company
   post 'companies/:company_id/employees/batch/payroll_records', to: 'payroll_records#batch_create'
 

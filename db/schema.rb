@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_25_132326) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_27_152432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,6 +66,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_25_132326) do
     t.decimal "roth_retirement_payment"
     t.jsonb "custom_columns_data"
     t.index ["employee_id"], name: "index_payroll_records_on_employee_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "password_digest"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "custom_columns", "companies"

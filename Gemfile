@@ -17,6 +17,12 @@ gem 'pry-rails'
 # Provides the features to directly call and partially interoperate with Python from the Ruby language
 gem 'pycall', '~> 1.3.0'
 
+# Use ActiveModel has_secure_password
+gem 'bcrypt', '~> 3.1.7'
+
+# Helps create JSON web tokens
+gem 'jwt'
+
 # Allows you to read Excel files
 gem 'roo'
 

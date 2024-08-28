@@ -40,9 +40,10 @@ class FilesController < ApplicationController
       render json: { error: 'Missing one or more required files.' }, status: :unprocessable_entity
       return
     end
-    
-    # Ensure Python path includes your script location
-    PyCall.exec("import sys; sys.path.append('/Users/leonshimizu/Desktop/TaxBusiness/tax-calculator/lib/python_scripts/')")
+
+    # Dynamically set the Python path using Rails.root
+    python_scripts_path = Rails.root.join('lib', 'python_scripts').to_s
+    PyCall.exec("import sys; sys.path.append('#{python_scripts_path}')")
 
     # Proceed with processing the files using the Python script
     pyimport 'process_payroll'

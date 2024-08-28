@@ -134,17 +134,6 @@ Make sure you have the following installed on your machine:
    rails db:drop db:create db:migrate db:schema:cache:clear db:seed
    ```
 
-### Python Path Setup for PyCall
-
-If you are using PyCall to run Python scripts from within your Rails application, ensure that you set the Python path to include your script location. You may need to update this line in your Rails controller to reflect the actual location of your repository:
-
-```ruby
-# Ensure Python path includes your script location
-PyCall.exec("import sys; sys.path.append('/Users/leonshimizu/Desktop/TaxBusiness/tax-calculator/lib/python_scripts/')")
-```
-
-Make sure to replace `'/Users/leonshimizu/Desktop/TaxBusiness/tax-calculator/lib/python_scripts/'` with the actual path to your `python_scripts` directory.
-
 ## Running the Application
 
 1. **Start the Rails server**:

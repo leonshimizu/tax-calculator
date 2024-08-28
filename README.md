@@ -1,24 +1,171 @@
-# README
+# Tax Calculator Application
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This repository contains the backend for the Tax Calculator application, which is built with Ruby on Rails. The backend integrates with a Python script for Excel file processing and communicates with a React.js frontend.
 
-Things you may want to cover:
+## Table of Contents
 
-* Ruby version
+- [Getting Started](#getting-started)
+- [Prerequisites](#prerequisites)
+- [Setup Instructions](#setup-instructions)
+  - [Ruby Setup](#ruby-setup)
+  - [Python Setup](#python-setup)
+  - [Rails Setup](#rails-setup)
+- [Running the Application](#running-the-application)
+- [Deployment](#deployment)
+- [Additional Information](#additional-information)
 
-* System dependencies
+## Getting Started
 
-* Configuration
+To get a local copy up and running, follow these simple steps.
 
-* Database creation
+## Prerequisites
 
-* Database initialization
+Make sure you have the following installed on your machine:
 
-* How to run the test suite
+- **Homebrew** (macOS)
+- **rbenv** or **RVM** for managing Ruby versions
+- **Python 3** and **pip** for Python package management
 
-* Services (job queues, cache servers, search engines, etc.)
+## Setup Instructions
 
-* Deployment instructions
+### Ruby Setup
 
-* ...
+1. **Install Homebrew** (macOS only):
+
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+
+2. **Install rbenv and ruby-build**:
+
+   ```bash
+   brew install rbenv ruby-build
+   ```
+
+3. **Initialize rbenv**:
+
+   ```bash
+   rbenv init
+   ```
+
+4. **Update your shell configuration**:
+
+   ```bash
+   echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc
+   source ~/.zshrc
+   ```
+
+5. **Install Ruby 3.2.3**:
+
+   ```bash
+   rbenv install 3.2.3
+   ```
+
+6. **Set the global Ruby version**:
+
+   ```bash
+   rbenv global 3.2.3
+   ```
+
+   Alternatively, to set the Ruby version locally for this app only:
+
+   ```bash
+   rbenv local 3.2.3
+   ```
+
+7. **Verify the Ruby version**:
+
+   ```bash
+   ruby -v
+   ```
+
+8. **Install Bundler**:
+
+   ```bash
+   gem install bundler
+   ```
+
+9. **Rehash rbenv shims**:
+
+   ```bash
+   rbenv rehash
+   ```
+
+### Python Setup
+
+1. **Check Python 3 installation**:
+
+   ```bash
+   python3 --version
+   pip3 --version
+   ```
+
+2. **Install Python 3 and pip** (if not already installed):
+
+   ```bash
+   brew install python
+   ```
+
+3. **Install required Python libraries**:
+
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+### Rails Setup
+
+1. **Install project dependencies**:
+
+   ```bash
+   bundle install
+   ```
+
+2. **Set up the database**:
+
+   ```bash
+   rails db:create
+   rails db:migrate
+   rails db:seed
+   ```
+
+3. **Reset the database** (if needed):
+
+   ```bash
+   rails db:drop db:create db:migrate db:schema:cache:clear db:seed
+   ```
+
+### Python Path Setup for PyCall
+
+If you are using PyCall to run Python scripts from within your Rails application, ensure that you set the Python path to include your script location. You may need to update this line in your Rails controller to reflect the actual location of your repository:
+
+```ruby
+# Ensure Python path includes your script location
+PyCall.exec("import sys; sys.path.append('/Users/leonshimizu/Desktop/TaxBusiness/tax-calculator/lib/python_scripts/')")
+```
+
+Make sure to replace `'/Users/leonshimizu/Desktop/TaxBusiness/tax-calculator/lib/python_scripts/'` with the actual path to your `python_scripts` directory.
+
+## Running the Application
+
+1. **Start the Rails server**:
+
+   ```bash
+   rails server
+   ```
+
+2. **Access the application**:
+
+   Open your browser and navigate to `http://localhost:3000`.
+
+## Deployment
+
+This application is automatically deployed to Render when commits are pushed to the main branch.
+
+- **Backend** is hosted at [tax-calculator-2-0.onrender.com](https://tax-calculator-2-0.onrender.com).
+- **Frontend** is hosted at [tax-calculator-frontend-2-0.onrender.com](https://tax-calculator-frontend-2-0.onrender.com).
+- **Database** is hosted at [Render PostgreSQL Dashboard](https://dashboard.render.com/d/dpg-cr1ceq23esus73at4vtg-a/info).
+
+## Additional Information
+
+- **Frontend Code Repository**: [GitHub Repository](https://github.com/leonshimizu/tax-calculator-frontend)
+- **Automatic Deployments**: Changes pushed to the main branch are automatically deployed online.

@@ -4,20 +4,38 @@ require 'roo'
 require 'caxlsx'
 
 module ProcessPayroll
-  def self.process(files)
+  def self.process(revel_file, combined_file)
     # Load each Excel file using Roo
-    revel_xlsx = Roo::Excelx.new(files[0])
-    tips1_xlsx = Roo::Excelx.new(files[1])
-    tips2_xlsx = Roo::Excelx.new(files[2])
-    loan_xlsx = Roo::Excelx.new(files[3])
+    revel_xlsx = Roo::Excelx.new(revel_file)
+    combined_xlsx = Roo::Excelx.new(combined_file) # Assuming tips and loan are in this file
 
-    # Convert to arrays of hashes for easier manipulation
+    # Convert Revel data to an array of hashes for easier manipulation
     revel_data = revel_xlsx.sheet(0).parse(headers: true).drop(1) # Skip header row
-    tips1_data = tips1_xlsx.sheet(0).parse(headers: true).drop(1) # Skip header row
-    tips2_data = tips2_xlsx.sheet(0).parse(headers: true).drop(1) # Skip header row
-    loan_data = loan_xlsx.sheet(0).parse(headers: true).drop(1)   # Skip header row
 
-    # Process Revel data to handle full names
+    # Initialize arrays to store parsed data from different sheets
+    tips1_data = []
+    tips2_data = []
+    loan_data = []
+
+    # Loop through each sheet in the combined file and categorize the data
+    combined_xlsx.sheets.each do |sheet_name|
+      sheet = combined_xlsx.sheet(sheet_name)
+      data = sheet.parse(headers: true).drop(1) # Skip header row
+
+      Rails.logger.info "Processing sheet: #{sheet_name} with headers: #{data.first.keys}"
+
+      if data.any? { |row| row.key?('reported_tips') }
+        if tips1_data.empty?
+          tips1_data = data
+        else
+          tips2_data = data
+        end
+      elsif data.any? { |row| row.key?('loan_payment') }
+        loan_data = data
+      end
+    end
+
+    # Process Revel data to handle full names and remove periods
     revel_data = revel_data.map do |row|
       if row.key?('full_name')
         if row['full_name'].nil?
@@ -31,6 +49,11 @@ module ProcessPayroll
       end
       row.slice('first_name', 'last_name', 'hours_worked', 'overtime_hours_worked')
     end.compact  # Remove any rows that were skipped
+
+    # Remove periods from tips and loans data
+    tips1_data = remove_periods_from_names(tips1_data)
+    tips2_data = remove_periods_from_names(tips2_data)
+    loan_data = remove_periods_from_names(loan_data)
 
     # Initialize a hash to store processed data
     processed_data = []
@@ -49,10 +72,6 @@ module ProcessPayroll
 
       processed_data << row
     end
-
-    # Debugging: Print processed data to console and flush immediately
-    puts "Processed data before writing to Excel: #{processed_data.inspect}"
-    $stdout.flush  # Ensure output is flushed immediately
 
     # Create a new Excel file with the processed data
     Axlsx::Package.new do |p|
@@ -75,8 +94,9 @@ module ProcessPayroll
 
   # Helper method to split full name into first, middle, and last names
   def self.split_full_name(full_name)
-    # Remove any leading/trailing whitespace and split by comma
-    name_parts = full_name.strip.split(',')
+    # Remove any leading/trailing whitespace, periods, and split by comma
+    full_name = full_name.to_s.gsub('.', '').strip # Ensure full_name is a string before gsub
+    name_parts = full_name.split(',')
 
     last_name = name_parts[0].strip if name_parts[0] # Get last name from the first part, trimming spaces
 
@@ -90,5 +110,13 @@ module ProcessPayroll
     end
 
     { first_name: first_name, last_name: last_name }
+  end
+
+  # Helper method to remove periods from first_name and last_name fields in a dataset
+  def self.remove_periods_from_names(data)
+    data.each do |row|
+      row['first_name'] = row['first_name'].to_s.gsub('.', '') if row.key?('first_name') && row['first_name']
+      row['last_name'] = row['last_name'].to_s.gsub('.', '') if row.key?('last_name') && row['last_name']
+    end
   end
 end

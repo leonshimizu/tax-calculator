@@ -11,9 +11,7 @@ class FilesController < ApplicationController
     # Initialize variables to store file paths
     temp_file_paths = {
       revel: nil,
-      tips_1: nil,
-      tips_2: nil,
-      loan: nil
+      combined: nil
     }
 
     uploaded_files.each do |file|
@@ -25,14 +23,8 @@ class FilesController < ApplicationController
       case file_type
       when 'revel'
         temp_file_paths[:revel] = temp_file_path
-      when 'tips'
-        if temp_file_paths[:tips_1].nil?
-          temp_file_paths[:tips_1] = temp_file_path
-        else
-          temp_file_paths[:tips_2] = temp_file_path
-        end
-      when 'loan'
-        temp_file_paths[:loan] = temp_file_path
+      when 'combined' # New case for the combined tips and loan file
+        temp_file_paths[:combined] = temp_file_path
       else
         Rails.logger.error "Invalid file content for file: #{file.original_filename}"
         render json: { error: "Invalid file content: #{file.original_filename}" }, status: :unprocessable_entity
@@ -51,15 +43,11 @@ class FilesController < ApplicationController
     Rails.logger.info "All required files present. Proceeding with processing."
 
     begin
-      master_file_path = ProcessPayroll.process(temp_file_paths.values)
+      master_file_path = ProcessPayroll.process(temp_file_paths[:revel], temp_file_paths[:combined])
       Rails.logger.info "Successfully processed payroll. Master file generated at: #{master_file_path}"
 
       # Send the master file to the user for download
       send_file master_file_path, type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'Master_Payroll_File.xlsx'
-
-      # # Delete the master file after sending it
-      # File.delete(master_file_path) if File.exist?(master_file_path)
-      # Rails.logger.info "Deleted master file: #{master_file_path}"
 
       # Clean up temporary files if necessary
       temp_file_paths.values.each do |path|
@@ -88,16 +76,18 @@ class FilesController < ApplicationController
 
   def identify_file_type(file_path)
     xlsx = Roo::Excelx.new(file_path)
-    headers = xlsx.row(1)
 
-    if headers.include?('hours_worked') && headers.include?('overtime_hours_worked')
-      'revel'
-    elsif headers.include?('reported_tips')
-      'tips'
-    elsif headers.include?('loan_payment')
-      'loan'
-    else
-      nil
+    # Iterate over each sheet to find expected headers
+    xlsx.sheets.each do |sheet_name|
+      headers = xlsx.sheet(sheet_name).row(1)
+
+      if headers.include?('hours_worked') && headers.include?('overtime_hours_worked')
+        return 'revel'
+      elsif headers.include?('reported_tips') || headers.include?('loan_payment')
+        return 'combined'
+      end
     end
+
+    nil # Return nil if no matching headers are found
   end
 end

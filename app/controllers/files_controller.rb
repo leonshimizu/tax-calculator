@@ -1,7 +1,7 @@
 # app/controllers/files_controller.rb
 class FilesController < ApplicationController
-  require 'pycall/import'
-  include PyCall::Import
+  # Make sure to require the file
+  require Rails.root.join('lib', 'process_payroll')
 
   def upload_files
     uploaded_files = params[:files]
@@ -47,26 +47,15 @@ class FilesController < ApplicationController
       return
     end
 
-    Rails.logger.info "All required files present. Proceeding with Python path setup."
+    Rails.logger.info "All required files present. Proceeding with processing."
 
-    # Dynamically set the Python path using Rails.root
-    python_scripts_path = Rails.root.join('lib', 'python_scripts').to_s
-    PyCall.exec("import sys; sys.path.append('#{python_scripts_path}')")
-  
-    # Log the current Python sys.path for debugging
-    current_sys_path = PyCall.eval('sys.path')
-    Rails.logger.info "Python sys.path after appending: #{current_sys_path}"
-  
     begin
-      pyimport 'process_payroll'
-      Rails.logger.info "Successfully imported Python script: process_payroll"
-      master_file_path = process_payroll.process_payroll(temp_file_paths.values)
-  
-      Rails.logger.info "Python script executed successfully. Master file generated at: #{master_file_path}"
-  
+      master_file_path = ProcessPayroll.process(temp_file_paths.values)
+      Rails.logger.info "Successfully processed payroll. Master file generated at: #{master_file_path}"
+
       # Send the master file to the user for download
       send_file master_file_path, type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'Master_Payroll_File.xlsx'
-  
+
       # Clean up temporary files if necessary
       temp_file_paths.values.each do |path|
         if path
@@ -74,18 +63,15 @@ class FilesController < ApplicationController
           Rails.logger.info "Deleted temporary file: #{path}"
         end
       end
-  
-    rescue PyCall::PyError => e
-      Rails.logger.error "Python error during processing: #{e.message}"
-      render json: { error: "Python processing failed: #{e.message}" }, status: :unprocessable_entity
+
     rescue => e
       Rails.logger.error "General error during file processing: #{e.message}"
       render json: { error: "Failed to process files: #{e.message}" }, status: :unprocessable_entity
     end
   end
-  
+
   private
-  
+
   def save_temp_file(file)
     temp_file = Rails.root.join('tmp', file.original_filename)
     File.open(temp_file, 'wb') do |f|
@@ -95,7 +81,6 @@ class FilesController < ApplicationController
     temp_file.to_s
   end
 
-  # Helper method to determine file type by reading its content
   def identify_file_type(file_path)
     xlsx = Roo::Excelx.new(file_path)
     headers = xlsx.row(1)

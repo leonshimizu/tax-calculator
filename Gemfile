@@ -14,9 +14,6 @@ gem 'pg'
 # Allows you to insert breakpoints in your code
 gem 'pry-rails'
 
-# Provides the features to directly call and partially interoperate with Python from the Ruby language
-gem 'pycall', '~> 1.3.0'
-
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 
@@ -25,6 +22,9 @@ gem 'jwt'
 
 # Allows you to read Excel files
 gem 'roo'
+
+# Allows you to create Excel files
+gem 'caxlsx'
 
 # Faker helps you generate realistic test data, and populate your database with more than a couple of records while you're doing development.
 gem 'faker'

@@ -1,6 +1,6 @@
 # Tax Calculator Application
 
-This repository contains the backend for the Tax Calculator application, which is built with Ruby on Rails. The backend integrates with a Python script for Excel file processing and communicates with a React.js frontend.
+This repository contains the backend for the Tax Calculator application, which is built with Ruby on Rails. The backend integrates with a Ruby script for Excel file processing and communicates with a React.js frontend.
 
 ## Table of Contents
 
@@ -8,7 +8,6 @@ This repository contains the backend for the Tax Calculator application, which i
 - [Prerequisites](#prerequisites)
 - [Setup Instructions](#setup-instructions)
   - [Ruby Setup](#ruby-setup)
-  - [Python Setup](#python-setup)
   - [Rails Setup](#rails-setup)
 - [Running the Application](#running-the-application)
 - [Deployment](#deployment)
@@ -24,7 +23,6 @@ Make sure you have the following installed on your machine:
 
 - **Homebrew** (macOS)
 - **rbenv** or **RVM** for managing Ruby versions
-- **Python 3** and **pip** for Python package management
 
 ## Setup Instructions
 
@@ -89,27 +87,6 @@ Make sure you have the following installed on your machine:
 
    ```bash
    rbenv rehash
-   ```
-
-### Python Setup
-
-1. **Check Python 3 installation**:
-
-   ```bash
-   python3 --version
-   pip3 --version
-   ```
-
-2. **Install Python 3 and pip** (if not already installed):
-
-   ```bash
-   brew install python
-   ```
-
-3. **Install required Python libraries**:
-
-   ```bash
-   pip install pandas openpyxl
    ```
 
 ### Rails Setup

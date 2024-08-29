@@ -33,3 +33,7 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore all excel files - need to figure out the proper way to not save the downloaded files onto the app
+master_payroll_file.xlsx
+*.xlsx

@@ -65,7 +65,7 @@ module ProcessPayroll
 
       tips1 = tips1_data.find { |t| t['first_name'] == first_name && t['last_name'] == last_name }&.fetch('reported_tips', 0).to_f
       tips2 = tips2_data.find { |t| t['first_name'] == first_name && t['last_name'] == last_name }&.fetch('reported_tips', 0).to_f
-      row['total_reported_tips'] = tips1 + tips2
+      row['reported_tips'] = tips1 + tips2
 
       loan = loan_data.find { |l| l['first_name'] == first_name && l['last_name'] == last_name }&.fetch('loan_payment', 0).to_f
       row['loan_payment'] = loan

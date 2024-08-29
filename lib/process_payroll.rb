@@ -17,10 +17,20 @@ module ProcessPayroll
     tips2_data = tips2_xlsx.sheet(0).parse(headers: true).drop(1) # Skip header row
     loan_data = loan_xlsx.sheet(0).parse(headers: true).drop(1)   # Skip header row
 
-    # Keep only necessary columns from Revel data
+    # Process Revel data to handle full names
     revel_data = revel_data.map do |row|
+      if row.key?('full_name')
+        if row['full_name'].nil?
+          Rails.logger.error "Row with missing full_name detected: #{row.inspect}"
+          next # Skip processing this row
+        else
+          names = split_full_name(row['full_name'])
+          row['first_name'] = names[:first_name]
+          row['last_name'] = names[:last_name]
+        end
+      end
       row.slice('first_name', 'last_name', 'hours_worked', 'overtime_hours_worked')
-    end
+    end.compact  # Remove any rows that were skipped
 
     # Initialize a hash to store processed data
     processed_data = []
@@ -59,5 +69,26 @@ module ProcessPayroll
     end
 
     'master_payroll_file.xlsx'
+  end
+
+  private
+
+  # Helper method to split full name into first, middle, and last names
+  def self.split_full_name(full_name)
+    # Remove any leading/trailing whitespace and split by comma
+    name_parts = full_name.strip.split(',')
+
+    last_name = name_parts[0].strip if name_parts[0] # Get last name from the first part, trimming spaces
+
+    # Handle first and middle names if present
+    if name_parts[1]
+      first_and_middle_names = name_parts[1].strip.split(' ')
+      first_name = first_and_middle_names.shift # Get the first name
+      first_name += " #{first_and_middle_names.join(' ')}" if first_and_middle_names.any? # Include middle names if present
+    else
+      first_name = '' # Default to an empty string if no first name part is available
+    end
+
+    { first_name: first_name, last_name: last_name }
   end
 end

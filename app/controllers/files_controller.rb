@@ -57,9 +57,9 @@ class FilesController < ApplicationController
       # Send the master file to the user for download
       send_file master_file_path, type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'Master_Payroll_File.xlsx'
 
-      # Delete the master file after sending it
-      File.delete(master_file_path) if File.exist?(master_file_path)
-      Rails.logger.info "Deleted master file: #{master_file_path}"
+      # # Delete the master file after sending it
+      # File.delete(master_file_path) if File.exist?(master_file_path)
+      # Rails.logger.info "Deleted master file: #{master_file_path}"
 
       # Clean up temporary files if necessary
       temp_file_paths.values.each do |path|

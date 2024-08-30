@@ -1,13 +1,19 @@
 # app/services/salary_payroll_calculator.rb
 class SalaryPayrollCalculator < PayrollCalculator
   def calculate
-    # Assume gross_pay is provided directly for salary employees
+    calculate_gross_pay # Now includes bonus
     calculate_retirement_payment
-    calculate_roth_retirement_payment
+    calculate_roth_retirement_payment # Corrected order
     calculate_withholding
     calculate_social_security
     calculate_medicare
-    calculate_total_deductions
+    payroll_record.calculate_total_deductions_and_additions # Now called after all individual calculations
     calculate_net_pay
+  end
+
+  private
+
+  def calculate_gross_pay
+    payroll_record.gross_pay += payroll_record.bonus.to_f
   end
 end

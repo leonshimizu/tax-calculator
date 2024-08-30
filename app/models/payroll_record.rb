@@ -1,3 +1,4 @@
+# app/models/payroll_record.rb
 class PayrollRecord < ApplicationRecord
   belongs_to :employee
 
@@ -24,13 +25,19 @@ class PayrollRecord < ApplicationRecord
   def update_payroll_details
     if employee.payroll_type == 'hourly'
       calculate_gross_pay
+    else
+      self.gross_pay = gross_pay.to_f + bonus.to_f
     end
 
+    calculate_retirement_payment
+    calculate_roth_retirement_payment if roth_retirement_payment.nil? || roth_retirement_payment.zero?
+
+    # Calculate all taxes before total deductions
     calculate_withholding
     calculate_social_security
     calculate_medicare
-    calculate_retirement_payment
-    calculate_roth_retirement_payment if roth_retirement_payment.nil? || roth_retirement_payment == 0.0
+
+    # Now calculate total deductions and additions
     calculate_total_deductions_and_additions
     calculate_net_pay
   end
@@ -41,36 +48,48 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_retirement_payment
-    self.retirement_payment = (self.gross_pay.to_f * (employee.retirement_rate.to_f / 100)).round(2)
+    self.retirement_payment ||= (self.gross_pay.to_f * (employee.retirement_rate.to_f / 100)).round(2)
   end
 
   def calculate_roth_retirement_payment
-    self.roth_retirement_payment ||= (self.gross_pay.to_f * (employee.roth_retirement_rate.to_f / 100)).round(2)
+    if self.roth_retirement_payment.nil? || self.roth_retirement_payment.zero?
+      # Calculate net pay before Roth deduction
+      pre_roth_net_pay = self.gross_pay.to_f - self.total_deductions + self.total_additions
+      self.roth_retirement_payment = (pre_roth_net_pay * (employee.roth_retirement_rate.to_f / 100)).round(2)
+    end
   end
 
   def calculate_withholding
-    taxable_income = self.gross_pay.to_f - self.roth_retirement_payment.to_f
+    total_gross_pay = self.gross_pay.to_f
+    taxable_income = total_gross_pay - self.roth_retirement_payment.to_f - other_deductions_not_subject_to_withholding
     self.withholding_tax = Calculator.calculate_withholding(taxable_income, employee.filing_status).round(2)
   end
 
   def calculate_social_security
-    self.social_security_tax = Calculator.calculate_social_security(self.gross_pay).round(2)
+    total_gross_pay = self.gross_pay.to_f
+    self.social_security_tax = Calculator.calculate_social_security(total_gross_pay).round(2)
   end
 
   def calculate_medicare
-    self.medicare_tax = Calculator.calculate_medicare(self.gross_pay).round(2)
+    total_gross_pay = self.gross_pay.to_f
+    self.medicare_tax = Calculator.calculate_medicare(total_gross_pay).round(2)
+  end
+
+  def other_deductions_not_subject_to_withholding
+    # Sum up any other deductions not subject to withholding
+    custom_columns_data.select { |_, value| value[:not_subject_to_withholding] }.values.map(&:to_f).sum
   end
 
   def calculate_total_deductions_and_additions
     if custom_columns_data.is_a?(Hash)
       # Access company through employee
       company = employee.company
-  
+
       # Use company to find deductions and additions
       custom_column_deductions = custom_columns_data.select do |name, _|
         company.custom_columns.find_by(name: name)&.is_deduction?
       end.values.map(&:to_f).sum
-  
+
       custom_column_additions = custom_columns_data.reject do |name, _|
         company.custom_columns.find_by(name: name)&.is_deduction?
       end.values.map(&:to_f).sum
@@ -78,18 +97,20 @@ class PayrollRecord < ApplicationRecord
       custom_column_deductions = 0.0
       custom_column_additions = 0.0
     end
-  
+
+    # Calculate total deductions with all required components
     self.total_deductions = [
-      withholding_tax,
-      social_security_tax,
-      medicare_tax,
-      loan_payment,
-      insurance_payment,
-      retirement_payment,
-      roth_retirement_payment,
+      withholding_tax.to_f,
+      social_security_tax.to_f,
+      medicare_tax.to_f,
+      loan_payment.to_f,
+      insurance_payment.to_f,
+      retirement_payment.to_f,
+      roth_retirement_payment.to_f,
       custom_column_deductions
-    ].map(&:to_f).sum.round(2)
-  
+    ].sum.round(2)
+
+    # Calculate total additions
     self.total_additions = custom_column_additions.round(2)
   end
 

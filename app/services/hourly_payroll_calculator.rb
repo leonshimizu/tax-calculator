@@ -3,11 +3,11 @@ class HourlyPayrollCalculator < PayrollCalculator
   def calculate
     calculate_gross_pay
     calculate_retirement_payment
-    calculate_roth_retirement_payment
+    calculate_roth_retirement_payment # Corrected order
     calculate_withholding
     calculate_social_security
     calculate_medicare
-    calculate_total_deductions
+    payroll_record.calculate_total_deductions_and_additions # Now called after all individual calculations
     calculate_net_pay
   end
 

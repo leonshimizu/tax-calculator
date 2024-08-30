@@ -2,7 +2,8 @@ Rails.application.routes.draw do
   # User authentication routes
   post "/users" => "users#create"
   post "/sessions" => "sessions#create"
-  
+  post "/sessions/refresh" => "sessions#refresh" # Add this line for token refresh
+
   # Route to get the current user
   get 'current_user', to: 'users#show_current_user'
 

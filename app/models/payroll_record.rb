@@ -43,8 +43,8 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_gross_pay
-    overtime_pay = overtime_hours_worked.to_f * employee.pay_rate * 1.5
-    self.gross_pay = ((hours_worked * employee.pay_rate) + overtime_pay + reported_tips.to_f).round(2)
+    overtime_pay = (overtime_hours_worked.to_f * employee.pay_rate * 1.5)
+    self.gross_pay = ((hours_worked.to_f * employee.pay_rate.to_f) + overtime_pay + reported_tips.to_f).round(2)
   end
 
   def calculate_retirement_payment
@@ -53,8 +53,12 @@ class PayrollRecord < ApplicationRecord
 
   def calculate_roth_retirement_payment
     if self.roth_retirement_payment.nil? || self.roth_retirement_payment.zero?
+      # Ensure total_deductions and total_additions are not nil
+      total_deductions_value = total_deductions.to_f
+      total_additions_value = total_additions.to_f
+
       # Calculate net pay before Roth deduction
-      pre_roth_net_pay = self.gross_pay.to_f - self.total_deductions + self.total_additions
+      pre_roth_net_pay = self.gross_pay.to_f - total_deductions_value + total_additions_value
       self.roth_retirement_payment = (pre_roth_net_pay * (employee.roth_retirement_rate.to_f / 100)).round(2)
     end
   end
@@ -76,6 +80,9 @@ class PayrollRecord < ApplicationRecord
   end
 
   def other_deductions_not_subject_to_withholding
+    # Check if custom_columns_data is not nil and is a Hash
+    return 0 unless custom_columns_data.is_a?(Hash)
+
     # Sum up any other deductions not subject to withholding
     custom_columns_data.select { |_, value| value[:not_subject_to_withholding] }.values.map(&:to_f).sum
   end
@@ -115,6 +122,6 @@ class PayrollRecord < ApplicationRecord
   end
 
   def calculate_net_pay
-    self.net_pay = (self.gross_pay.to_f - self.total_deductions + self.total_additions).round(2)
+    self.net_pay = (self.gross_pay.to_f - self.total_deductions.to_f + self.total_additions.to_f).round(2)
   end
 end

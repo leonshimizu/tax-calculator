@@ -18,6 +18,7 @@ EMPLOYEE_COUNT = 30
 # Clear existing data
 PayrollRecord.delete_all
 Employee.delete_all
+Department.delete_all
 Company.delete_all
 
 # Specified company names
@@ -45,20 +46,28 @@ company_names.each do |company_name|
 
   puts "Created #{company.name}"
 
+  # Create departments for the company
+  departments = {
+    'front_of_house' => company.departments.create!(name: 'Front of House'),
+    'back_of_house' => company.departments.create!(name: 'Back of House'),
+    'salary' => company.departments.create!(name: 'Salary')
+  }
+
   EMPLOYEE_COUNT.times do
     # Randomly choose payroll type
     payroll_type = ['hourly', 'salary'].sample
-    department = payroll_type == 'hourly' ? ['front_of_house', 'back_of_house'].sample : 'salary'
+    department_name = payroll_type == 'hourly' ? ['front_of_house', 'back_of_house'].sample : 'salary'
+    department = departments[department_name] # Use the appropriate department
 
     # Generate employee attributes based on payroll type
     employee_attrs = {
       first_name: Faker::Name.first_name,
       last_name: Faker::Name.last_name,
       filing_status: ['single', 'married', 'head_of_household'].sample,
-      department: department,
       payroll_type: payroll_type,
       retirement_rate: Faker::Number.between(from: 0, to: 10),
-      roth_retirement_rate: Faker::Number.between(from: 0, to: 10)
+      roth_retirement_rate: Faker::Number.between(from: 0, to: 10),
+      department_id: department.id # Assign department_id
     }
 
     # Set pay_rate for hourly employees

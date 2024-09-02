@@ -1,16 +1,15 @@
-# app/controllers/employees_controller.rb
 class EmployeesController < ApplicationController
   before_action :set_company
   before_action :set_employee, only: [:show, :update, :destroy]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   def index
-    employees = @company.employees.all
-    render json: employees
+    employees = @company.employees.includes(:department).all
+    render json: employees, include: :department
   end
 
   def show
-    render json: @employee
+    render json: @employee, include: :department
   end
 
   def create
@@ -50,7 +49,7 @@ class EmployeesController < ApplicationController
     employees_data.each do |employee_data|
       # Convert ActionController::Parameters to a permitted hash
       permitted_data = employee_data.permit(
-        :first_name, :last_name, :payroll_type, :department, :pay_rate,
+        :first_name, :last_name, :payroll_type, :department_id, :pay_rate,
         :retirement_rate, :roth_retirement_rate, :filing_status
       ).to_h
 
@@ -118,7 +117,7 @@ class EmployeesController < ApplicationController
       :filing_status, 
       :pay_rate, 
       :retirement_rate, 
-      :department, 
+      :department_id,  # Update to use department_id
       :first_name, 
       :last_name, 
       :company_id, 
@@ -129,7 +128,7 @@ class EmployeesController < ApplicationController
 
   def required_fields_missing?(data)
     data[:first_name].blank? || data[:last_name].blank? ||
-    data[:payroll_type].blank? || data[:department].blank? ||
+    data[:payroll_type].blank? || data[:department_id].blank? ||  # Update to check department_id
     data[:pay_rate].blank?
   end
 end

@@ -14,6 +14,11 @@ Rails.application.routes.draw do
 
   # Routes for companies and nested resources
   resources :companies do
+    # Nested routes for departments within companies
+    resources :departments do
+      # You may add nested resources here if needed, such as employees under a specific department
+    end
+
     resources :employees do
       resources :payroll_records, only: [:index, :show, :create, :update, :destroy]
 

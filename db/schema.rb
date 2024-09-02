@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_29_192026) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_01_192559) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -31,11 +31,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_29_192026) do
     t.index ["company_id"], name: "index_custom_columns_on_company_id"
   end
 
+  create_table "departments", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_departments_on_company_id"
+  end
+
   create_table "employees", force: :cascade do |t|
     t.string "filing_status"
     t.decimal "pay_rate", precision: 10, scale: 2
     t.decimal "retirement_rate"
-    t.string "department"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "first_name"
@@ -43,7 +50,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_29_192026) do
     t.bigint "company_id"
     t.string "payroll_type", default: "hourly"
     t.decimal "roth_retirement_rate"
+    t.bigint "department_id"
     t.index ["company_id"], name: "index_employees_on_company_id"
+    t.index ["department_id"], name: "index_employees_on_department_id"
   end
 
   create_table "payroll_records", force: :cascade do |t|
@@ -81,6 +90,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_29_192026) do
   end
 
   add_foreign_key "custom_columns", "companies"
+  add_foreign_key "departments", "companies"
   add_foreign_key "employees", "companies"
+  add_foreign_key "employees", "departments"
   add_foreign_key "payroll_records", "employees"
 end

@@ -1,6 +1,5 @@
-# app/controllers/companies_controller.rb
 class CompaniesController < ApplicationController
-  before_action :set_company, only: [:show, :update, :destroy]
+  before_action :set_company, only: [:show, :update, :destroy, :department_ytd_totals, :company_ytd_totals]
 
   # GET /companies
   def index
@@ -35,20 +34,31 @@ class CompaniesController < ApplicationController
 
   # DELETE /companies/:id
   def destroy
-    @company.destroy
+    if @company.destroy
+      render json: { notice: 'Company was successfully destroyed.' }, status: :ok
+    else
+      render json: { error: 'Error destroying company.' }, status: :unprocessable_entity
+    end
   end
 
+  # GET /companies/:id/department_ytd_totals
   def department_ytd_totals
-    company = Company.find(params[:id])
-    department = params[:department]
-    year = params[:year].to_i || Time.current.year
-    render json: company.department_ytd_totals(department, year)
+    department_id = params[:department_id]
+    year = params[:year].presence || Time.current.year
+
+    department = @company.departments.find_by(id: department_id)
+    
+    if department
+      render json: @company.department_ytd_totals(department, year.to_i)
+    else
+      render json: { error: 'Department not found.' }, status: :not_found
+    end
   end
 
+  # GET /companies/:id/company_ytd_totals
   def company_ytd_totals
-    company = Company.find(params[:id])
-    year = params[:year].to_i || Time.current.year
-    render json: company.company_ytd_totals(year)
+    year = params[:year].presence || Time.current.year
+    render json: @company.company_ytd_totals(year.to_i)
   end
 
   private
@@ -58,6 +68,6 @@ class CompaniesController < ApplicationController
   end
 
   def company_params
-    params.require(:company).permit(:name, :address, :phone_number, :email) # Adjust the permitted parameters as needed
+    params.require(:company).permit(:name)
   end
 end

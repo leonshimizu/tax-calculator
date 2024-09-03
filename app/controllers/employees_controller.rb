@@ -45,28 +45,43 @@ class EmployeesController < ApplicationController
 
   def upload
     employees_data = params[:employees]
-
+  
     employees_data.each do |employee_data|
       # Convert ActionController::Parameters to a permitted hash
       permitted_data = employee_data.permit(
-        :first_name, :last_name, :payroll_type, :department_id, :pay_rate,
+        :first_name, :last_name, :payroll_type, :department, :department_id, :pay_rate,
         :retirement_rate, :roth_retirement_rate, :filing_status
       ).to_h
-
+  
       # Adjust the retirement_rate if necessary
       permitted_data[:retirement_rate] = adjust_retirement_rate(permitted_data[:retirement_rate])
       permitted_data[:roth_retirement_rate] = adjust_retirement_rate(permitted_data[:roth_retirement_rate]) if permitted_data[:roth_retirement_rate]
+  
+      # Fetch or find the department by ID or name
+      department = if permitted_data[:department_id]
+                     @company.departments.find(permitted_data[:department_id])
+                   else
+                     @company.departments.find_by(name: permitted_data[:department])
+                   end
+  
+      # If department is not found, log the error and skip this employee
+      unless department
+        Rails.logger.error "Department not found for employee #{permitted_data[:first_name]} #{permitted_data[:last_name]}."
+        next
+      end
   
       # Find or initialize an employee by first and last name
       employee = @company.employees.find_or_initialize_by(
         first_name: permitted_data[:first_name],
         last_name: permitted_data[:last_name]
       )
-
+  
+      # Assign the department and other attributes
+      employee.assign_attributes(permitted_data.except(:department, :department_id))
+      employee.department = department
+  
       # Check if the existing employee needs an update
       if employee.new_record? || attributes_need_update?(employee, permitted_data)
-        employee.assign_attributes(permitted_data)
-
         unless employee.save
           Rails.logger.error "Failed to save employee #{employee.first_name} #{employee.last_name}: #{employee.errors.full_messages.join(', ')}"
         end

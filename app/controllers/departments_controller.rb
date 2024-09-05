@@ -1,3 +1,4 @@
+# app/controllers/departments_controller.rb
 class DepartmentsController < ApplicationController
   before_action :set_company
   before_action :set_department, only: [:show, :update, :destroy]
@@ -41,14 +42,25 @@ class DepartmentsController < ApplicationController
     end
   end
 
+  # GET /companies/:company_id/departments/ytd_totals
+  def ytd_totals
+    year = params[:year].presence || Time.current.year
+    totals = @department.calculate_ytd_totals(year.to_i)
+    render json: totals
+  end
+
   private
 
   def set_company
     @company = Company.find(params[:company_id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Company not found.' }, status: :not_found
   end
 
   def set_department
     @department = @company.departments.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Department not found.' }, status: :not_found
   end
 
   def department_params

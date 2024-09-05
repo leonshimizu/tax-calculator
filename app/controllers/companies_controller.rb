@@ -1,5 +1,5 @@
 class CompaniesController < ApplicationController
-  before_action :set_company, only: [:show, :update, :destroy, :department_ytd_totals, :company_ytd_totals]
+  before_action :set_company, only: [:show, :update, :destroy, :company_ytd_totals, :update_ytd_totals]
 
   # GET /companies
   def index
@@ -41,30 +41,35 @@ class CompaniesController < ApplicationController
     end
   end
 
-  # GET /companies/:id/department_ytd_totals
-  def department_ytd_totals
-    department_id = params[:department_id]
-    year = params[:year].presence || Time.current.year
-
-    department = @company.departments.find_by(id: department_id)
-    
-    if department
-      render json: @company.department_ytd_totals(department, year.to_i)
-    else
-      render json: { error: 'Department not found.' }, status: :not_found
-    end
-  end
-
   # GET /companies/:id/company_ytd_totals
   def company_ytd_totals
     year = params[:year].presence || Time.current.year
-    render json: @company.company_ytd_totals(year.to_i)
+    totals = @company.calculate_ytd_totals(year.to_i)
+    render json: totals
+  end
+
+  # POST /companies/:id/update_ytd_totals
+  def update_ytd_totals
+    year = params[:year]
+
+    if year.blank?
+      render json: { error: 'Year parameter is missing.' }, status: :bad_request and return
+    end
+
+    begin
+      @company.calculate_company_ytd_totals(year.to_i)
+      render json: { message: 'YTD totals updated successfully' }, status: :ok
+    rescue StandardError => e
+      render json: { error: 'Failed to update YTD totals' }, status: :unprocessable_entity
+    end
   end
 
   private
 
   def set_company
     @company = Company.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Company not found.' }, status: :not_found
   end
 
   def company_params

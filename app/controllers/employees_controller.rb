@@ -1,3 +1,4 @@
+# app/controllers/employees_controller.rb
 class EmployeesController < ApplicationController
   before_action :set_company
   before_action :set_employee, only: [:show, :update, :destroy]
@@ -37,57 +38,51 @@ class EmployeesController < ApplicationController
     end
   end
 
+  # GET /companies/:company_id/employees/ytd_totals
   def ytd_totals
-    employee = Employee.find(params[:id])
     year = params[:year].presence || Time.current.year
-    render json: employee.ytd_totals(year.to_i)
+    totals = @employee.calculate_ytd_totals(year.to_i)
+    render json: totals
   end
 
   def upload
     employees_data = params[:employees]
-  
+
     employees_data.each do |employee_data|
-      # Convert ActionController::Parameters to a permitted hash
       permitted_data = employee_data.permit(
         :first_name, :last_name, :payroll_type, :department, :department_id, :pay_rate,
         :retirement_rate, :roth_retirement_rate, :filing_status
       ).to_h
-  
-      # Adjust the retirement_rate if necessary
+
       permitted_data[:retirement_rate] = adjust_retirement_rate(permitted_data[:retirement_rate])
       permitted_data[:roth_retirement_rate] = adjust_retirement_rate(permitted_data[:roth_retirement_rate]) if permitted_data[:roth_retirement_rate]
-  
-      # Fetch or find the department by ID or name
+
       department = if permitted_data[:department_id]
                      @company.departments.find(permitted_data[:department_id])
                    else
                      @company.departments.find_by(name: permitted_data[:department])
                    end
-  
-      # If department is not found, log the error and skip this employee
+
       unless department
         Rails.logger.error "Department not found for employee #{permitted_data[:first_name]} #{permitted_data[:last_name]}."
         next
       end
-  
-      # Find or initialize an employee by first and last name
+
       employee = @company.employees.find_or_initialize_by(
         first_name: permitted_data[:first_name],
         last_name: permitted_data[:last_name]
       )
-  
-      # Assign the department and other attributes
+
       employee.assign_attributes(permitted_data.except(:department, :department_id))
       employee.department = department
-  
-      # Check if the existing employee needs an update
+
       if employee.new_record? || attributes_need_update?(employee, permitted_data)
         unless employee.save
           Rails.logger.error "Failed to save employee #{employee.first_name} #{employee.last_name}: #{employee.errors.full_messages.join(', ')}"
         end
       end
     end
-  
+
     render json: { message: 'Employees uploaded successfully' }, status: :ok
   rescue StandardError => e
     Rails.logger.error "Error uploading employees: #{e.message}"
@@ -95,21 +90,14 @@ class EmployeesController < ApplicationController
   end
 
   private
-  
+
   def adjust_retirement_rate(rate)
     rate = rate.to_f
-    if rate > 0 && rate < 1
-      rate * 100  # Convert decimal to percentage
-    else
-      rate
-    end
+    rate > 0 && rate < 1 ? rate * 100 : rate
   end
 
   def attributes_need_update?(employee, permitted_data)
-    # Convert permitted_data to a hash before comparing
-    permitted_data.to_h.any? do |key, value|
-      employee[key] != value
-    end
+    permitted_data.to_h.any? { |key, value| employee[key] != value }
   end
 
   def set_company
@@ -119,7 +107,10 @@ class EmployeesController < ApplicationController
   end
 
   def set_employee
-    @employee = @company.employees.find(params[:employee_id] || params[:id])
+    @employee = @company.employees.find(params[:id])
+    if @employee.nil?
+      render json: { error: 'Employee not found' }, status: :not_found
+    end
   end
 
   def handle_not_found
@@ -132,18 +123,12 @@ class EmployeesController < ApplicationController
       :filing_status, 
       :pay_rate, 
       :retirement_rate, 
-      :department_id,  # Update to use department_id
+      :department_id,  
       :first_name, 
       :last_name, 
       :company_id, 
       :payroll_type, 
       :roth_retirement_rate
     )
-  end
-
-  def required_fields_missing?(data)
-    data[:first_name].blank? || data[:last_name].blank? ||
-    data[:payroll_type].blank? || data[:department_id].blank? ||  # Update to check department_id
-    data[:pay_rate].blank?
   end
 end

@@ -28,7 +28,7 @@ Rails.application.routes.draw do
 
     resources :employees do
       collection do
-        post 'upload'  # Bulk upload employees
+        post 'upload', to: 'employees#upload'  # Bulk upload employees
       end
 
       member do
@@ -38,20 +38,27 @@ Rails.application.routes.draw do
       resources :payroll_records, only: [:index, :show, :create, :update, :destroy]
     end
 
+    # Routes for managing custom columns
     resources :custom_columns, only: [:index, :create, :destroy]
 
+    # Route to fetch all payroll records for a company
+    get 'payroll_records', to: 'payroll_records#index'
+
+    # Separate payroll records route for bulk upload
     resources :payroll_records, only: [] do
       collection do
         post 'upload'  # Upload payroll records in bulk
       end
     end
 
+    # Route for uploading payroll master file
     post 'payroll_master_file/upload', to: 'files#upload_files'
   end
 
+  # Route for file upload at the root level
+  post 'upload_files', to: 'files#upload_files'
+
   # Additional routes
-  get 'payroll_records', to: 'payroll_records#index'
-  post 'api/upload_files', to: 'files#upload_files'
   get 'calculate', to: 'tax_calculator#calculate'
   get 'net_pay/show', to: 'net_pay#show'
   root 'net_pay#show'

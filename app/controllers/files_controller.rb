@@ -1,8 +1,13 @@
 # app/controllers/files_controller.rb
-
 class FilesController < ApplicationController
+
   # Make sure to require the file
   require Rails.root.join('lib', 'process_payroll')
+
+  def create
+    # work around because the before_action :ensure_user_approved, except: [:create] # Exclude file uploads and user creation
+    # from the application controller runs and it fails if there isn't a create method
+  end
 
   def upload_files
     uploaded_files = params[:files]

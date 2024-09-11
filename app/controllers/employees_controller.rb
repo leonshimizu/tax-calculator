@@ -61,7 +61,6 @@ class EmployeesController < ApplicationController
         total_deductions: employee_ytd_totals&.total_deductions || 0
       }
   
-      Rails.logger.info(employee_data)  # Debugging log
       employee_data
     end
   

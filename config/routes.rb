@@ -33,7 +33,7 @@ Rails.application.routes.draw do
       end
 
       member do
-        # get 'ytd_totals'  # Dynamically calculate YTD totals for a specific employee (optional)
+        get 'ytd_totals'  # Dynamically calculate YTD totals for a specific employee (optional)
       end
 
       resources :payroll_records, only: [:index, :show, :create, :update, :destroy]

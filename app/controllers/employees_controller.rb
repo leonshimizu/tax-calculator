@@ -41,7 +41,8 @@ class EmployeesController < ApplicationController
   end
 
   def ytd_totals
-    @employees = @company.employees.map do |employee|
+    if params[:id] # If there's an employee_id in the request, fetch YTD totals for a specific employee
+      employee = @company.employees.find(params[:id])
       employee.calculate_ytd_totals(params[:year].to_i)
       employee_ytd_totals = employee.employee_ytd_totals.find_by(year: params[:year])
   
@@ -61,10 +62,32 @@ class EmployeesController < ApplicationController
         total_deductions: employee_ytd_totals&.total_deductions || 0
       }
   
-      employee_data
-    end
+      render json: employee_data
+    else
+      # Fetch YTD totals for all employees
+      @employees = @company.employees.map do |employee|
+        employee.calculate_ytd_totals(params[:year].to_i)
+        employee_ytd_totals = employee.employee_ytd_totals.find_by(year: params[:year])
+    
+        {
+          first_name: employee.first_name,
+          last_name: employee.last_name,
+          hours_worked: employee_ytd_totals&.hours_worked || 0,
+          overtime_hours_worked: employee_ytd_totals&.overtime_hours_worked || 0,
+          gross_pay: employee_ytd_totals&.gross_pay || 0,
+          net_pay: employee_ytd_totals&.net_pay || 0,
+          withholding_tax: employee_ytd_totals&.withholding_tax || 0,
+          social_security_tax: employee_ytd_totals&.social_security_tax || 0,
+          medicare_tax: employee_ytd_totals&.medicare_tax || 0,
+          retirement_payment: employee_ytd_totals&.retirement_payment || 0,
+          roth_retirement_payment: employee_ytd_totals&.roth_retirement_payment || 0,
+          bonus: employee_ytd_totals&.bonus || 0,
+          total_deductions: employee_ytd_totals&.total_deductions || 0
+        }
+      end
   
-    render json: @employees
+      render json: @employees
+    end
   end
 
   def upload

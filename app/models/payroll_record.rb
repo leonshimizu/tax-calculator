@@ -7,6 +7,8 @@ class PayrollRecord < ApplicationRecord
 
   before_save :update_payroll_details
 
+  after_save :update_employee_ytd_totals
+
   scope :sum_fields, -> {
     select("SUM(hours_worked) AS total_hours_worked,
             SUM(overtime_hours_worked) AS total_overtime_hours_worked,
@@ -123,5 +125,11 @@ class PayrollRecord < ApplicationRecord
 
   def calculate_net_pay
     self.net_pay = (self.gross_pay.to_f - self.total_deductions.to_f + self.total_additions.to_f).round(2)
+  end
+
+  private
+
+  def update_employee_ytd_totals
+    employee.calculate_ytd_totals(date.year)
   end
 end

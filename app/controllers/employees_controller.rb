@@ -1,7 +1,9 @@
 # app/controllers/employees_controller.rb
 class EmployeesController < ApplicationController
   before_action :set_company
-  before_action :set_employee, only: [:show, :update, :destroy]
+  before_action :set_employee, only: [:show, :update, :destroy, :ytd_totals]
+  # Skip setting a specific employee, as this is a collection route
+  skip_before_action :set_employee, only: [:ytd_totals]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
   def index
@@ -38,11 +40,32 @@ class EmployeesController < ApplicationController
     end
   end
 
-  # GET /companies/:company_id/employees/ytd_totals
   def ytd_totals
-    year = params[:year].presence || Time.current.year
-    totals = @employee.calculate_ytd_totals(year.to_i)
-    render json: totals
+    @employees = @company.employees.map do |employee|
+      employee.calculate_ytd_totals(params[:year].to_i)
+      employee_ytd_totals = employee.employee_ytd_totals.find_by(year: params[:year])
+  
+      employee_data = {
+        first_name: employee.first_name,
+        last_name: employee.last_name,
+        hours_worked: employee_ytd_totals&.hours_worked || 0,
+        overtime_hours_worked: employee_ytd_totals&.overtime_hours_worked || 0,
+        gross_pay: employee_ytd_totals&.gross_pay || 0,
+        net_pay: employee_ytd_totals&.net_pay || 0,
+        withholding_tax: employee_ytd_totals&.withholding_tax || 0,
+        social_security_tax: employee_ytd_totals&.social_security_tax || 0,
+        medicare_tax: employee_ytd_totals&.medicare_tax || 0,
+        retirement_payment: employee_ytd_totals&.retirement_payment || 0,
+        roth_retirement_payment: employee_ytd_totals&.roth_retirement_payment || 0,
+        bonus: employee_ytd_totals&.bonus || 0,
+        total_deductions: employee_ytd_totals&.total_deductions || 0
+      }
+  
+      Rails.logger.info(employee_data)  # Debugging log
+      employee_data
+    end
+  
+    render json: @employees
   end
 
   def upload

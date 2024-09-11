@@ -29,10 +29,11 @@ Rails.application.routes.draw do
     resources :employees do
       collection do
         post 'upload', to: 'employees#upload'  # Bulk upload employees
+        get 'ytd_totals', to: 'employees#ytd_totals'  # Calculate YTD totals for all employees in a company
       end
 
       member do
-        get 'ytd_totals'  # Dynamically calculate YTD totals for an employee
+        # get 'ytd_totals'  # Dynamically calculate YTD totals for a specific employee (optional)
       end
 
       resources :payroll_records, only: [:index, :show, :create, :update, :destroy]

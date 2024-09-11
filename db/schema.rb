@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_05_174109) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_11_155041) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -65,19 +65,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_05_174109) do
 
   create_table "employee_ytd_totals", force: :cascade do |t|
     t.bigint "employee_id", null: false
-    t.integer "year", null: false
-    t.decimal "hours_worked", default: "0.0"
-    t.decimal "overtime_hours_worked", default: "0.0"
-    t.decimal "gross_pay", default: "0.0"
-    t.decimal "net_pay", default: "0.0"
-    t.decimal "withholding_tax", default: "0.0"
-    t.decimal "social_security_tax", default: "0.0"
-    t.decimal "medicare_tax", default: "0.0"
-    t.decimal "retirement_payment", default: "0.0"
-    t.decimal "roth_retirement_payment", default: "0.0"
-    t.decimal "bonus", precision: 12, scale: 3, default: "0.0"
-    t.decimal "total_deductions", precision: 12, scale: 3, default: "0.0"
-    t.jsonb "custom_columns_data", default: {}
+    t.integer "year"
+    t.decimal "hours_worked"
+    t.decimal "overtime_hours_worked"
+    t.decimal "gross_pay"
+    t.decimal "net_pay"
+    t.decimal "withholding_tax"
+    t.decimal "social_security_tax"
+    t.decimal "medicare_tax"
+    t.decimal "retirement_payment"
+    t.decimal "roth_retirement_payment"
+    t.decimal "bonus"
+    t.decimal "total_deductions"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["employee_id"], name: "index_employee_ytd_totals_on_employee_id"

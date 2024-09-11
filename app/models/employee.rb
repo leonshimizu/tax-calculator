@@ -3,6 +3,7 @@ class Employee < ApplicationRecord
   belongs_to :company
   belongs_to :department, optional: true
   has_many :payroll_records, dependent: :destroy
+  has_many :employee_ytd_totals, dependent: :destroy
 
   validates :retirement_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100, allow_nil: true }
   validates :roth_retirement_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100, allow_nil: true }
@@ -12,6 +13,8 @@ class Employee < ApplicationRecord
   def calculate_ytd_totals(year)
     totals = initialize_totals
     payroll_records_for_year(year).each do |record|
+      totals[:hours_worked] += record.hours_worked.to_f
+      totals[:overtime_hours_worked] += record.overtime_hours_worked.to_f
       totals[:gross_pay] += record.gross_pay.to_f
       totals[:net_pay] += record.net_pay.to_f
       totals[:withholding_tax] += record.withholding_tax.to_f
@@ -22,7 +25,7 @@ class Employee < ApplicationRecord
       totals[:bonus] += record.bonus.to_f
       totals[:total_deductions] += record.total_deductions.to_f
     end
-    totals
+    update_ytd_totals(totals, year)
   end
 
   private
@@ -33,6 +36,8 @@ class Employee < ApplicationRecord
 
   def initialize_totals
     {
+      hours_worked: 0.0,
+      overtime_hours_worked: 0.0,
       gross_pay: 0.0,
       net_pay: 0.0,
       withholding_tax: 0.0,
@@ -43,6 +48,12 @@ class Employee < ApplicationRecord
       bonus: 0.0,
       total_deductions: 0.0
     }
+  end
+
+  def update_ytd_totals(totals, year)
+    ytd_total = employee_ytd_totals.find_or_initialize_by(year: year)
+    ytd_total.update(totals)
+    ytd_total # Return the ytd_total object instead of a boolean
   end
 
   def hourly_employee?

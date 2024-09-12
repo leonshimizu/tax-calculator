@@ -1,13 +1,3 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
-
 # db/seeds.rb
 
 require 'faker'
@@ -16,7 +6,9 @@ require 'faker'
 EMPLOYEE_COUNT = 30
 
 # Clear existing data
+# Ensure we delete dependent records in the correct order to avoid foreign key violations
 PayrollRecord.delete_all
+EmployeeYtdTotal.delete_all # Clear YTD totals before employees to avoid foreign key violations
 Employee.delete_all
 Department.delete_all
 Company.delete_all
@@ -74,6 +66,13 @@ company_names.each do |company_name|
     employee_attrs[:pay_rate] = Faker::Number.decimal(l_digits: 2, r_digits: 2) if payroll_type == 'hourly'
 
     employee = company.employees.create!(employee_attrs)
+
+    # Create a corresponding Employee YTD Total record
+    # Adjust these attributes to match what's in your EmployeeYtdTotal model
+    EmployeeYtdTotal.create!(
+      employee_id: employee.id
+      # Add or adjust the attributes here based on what exists in your EmployeeYtdTotal model
+    )
 
     # Generate bi-weekly payroll records from the start of 2023 until the most recent past Thursday
     (start_date..end_date).step(14).each do |pay_date|

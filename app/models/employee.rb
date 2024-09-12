@@ -24,6 +24,10 @@ class Employee < ApplicationRecord
       totals[:roth_retirement_payment] += record.roth_retirement_payment.to_f
       totals[:bonus] += record.bonus.to_f
       totals[:total_deductions] += record.total_deductions.to_f
+      totals[:reported_tips] += record.reported_tips.to_f
+      totals[:loan_payment] += record.loan_payment.to_f
+      totals[:insurance_payment] += record.insurance_payment.to_f
+      totals[:total_additions] += record.total_additions.to_f
     end
     update_ytd_totals(totals, year)
   end
@@ -46,14 +50,18 @@ class Employee < ApplicationRecord
       retirement_payment: 0.0,
       roth_retirement_payment: 0.0,
       bonus: 0.0,
-      total_deductions: 0.0
+      total_deductions: 0.0,
+      reported_tips: 0.0,
+      loan_payment: 0.0,
+      insurance_payment: 0.0,
+      total_additions: 0.0
     }
   end
 
   def update_ytd_totals(totals, year)
     ytd_total = employee_ytd_totals.find_or_initialize_by(year: year)
     ytd_total.update(totals)
-    ytd_total # Return the ytd_total object instead of a boolean
+    ytd_total
   end
 
   def hourly_employee?

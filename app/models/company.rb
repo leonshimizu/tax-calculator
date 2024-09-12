@@ -7,29 +7,8 @@ class Company < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
 
-  # Calculates YTD totals for a given year
   def calculate_ytd_totals(year)
-    # Initialize the totals
-    totals = {
-      hours_worked: 0,
-      overtime_hours_worked: 0,
-      reported_tips: 0,
-      loan_payment: 0,
-      insurance_payment: 0,
-      gross_pay: 0,
-      net_pay: 0,
-      withholding_tax: 0,
-      social_security_tax: 0,
-      medicare_tax: 0,
-      retirement_payment: 0,
-      roth_retirement_payment: 0,
-      bonus: 0,
-      total_deductions: 0,
-      total_additions: 0,
-      custom_columns_data: {} # Ensure this is an empty hash initially
-    }
-
-    # Fetch payroll records for the given year
+    totals = initialize_totals
     payroll_records_for_year(year).each do |record|
       totals[:hours_worked] += record.hours_worked.to_f
       totals[:overtime_hours_worked] += record.overtime_hours_worked.to_f
@@ -47,7 +26,6 @@ class Company < ApplicationRecord
       totals[:total_deductions] += record.total_deductions.to_f
       totals[:total_additions] += record.total_additions.to_f
 
-      # Safely merge custom columns data
       record.custom_columns_data&.each do |key, value|
         totals[:custom_columns_data][key] ||= 0
         totals[:custom_columns_data][key] += value.to_f
@@ -57,7 +35,29 @@ class Company < ApplicationRecord
     totals
   end
 
-  # Returns payroll records for a specific year
+  private
+
+  def initialize_totals
+    {
+      hours_worked: 0.0,
+      overtime_hours_worked: 0.0,
+      reported_tips: 0.0,
+      loan_payment: 0.0,
+      insurance_payment: 0.0,
+      gross_pay: 0.0,
+      net_pay: 0.0,
+      withholding_tax: 0.0,
+      social_security_tax: 0.0,
+      medicare_tax: 0.0,
+      retirement_payment: 0.0,
+      roth_retirement_payment: 0.0,
+      bonus: 0.0,
+      total_deductions: 0.0,
+      total_additions: 0.0,
+      custom_columns_data: {}
+    }
+  end
+
   def payroll_records_for_year(year)
     payroll_records.where(date: Date.new(year, 1, 1)..Date.new(year, 12, 31))
   end

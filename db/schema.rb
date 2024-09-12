@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_11_155041) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_12_105550) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -29,6 +29,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_11_155041) do
     t.jsonb "custom_columns_data", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "reported_tips", default: "0.0"
+    t.decimal "loan_payment", default: "0.0"
+    t.decimal "insurance_payment", default: "0.0"
+    t.decimal "total_additions", default: "0.0"
     t.index ["company_id"], name: "index_company_ytd_totals_on_company_id"
   end
 
@@ -79,6 +83,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_11_155041) do
     t.decimal "total_deductions"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "reported_tips", default: "0.0"
+    t.decimal "loan_payment", default: "0.0"
+    t.decimal "insurance_payment", default: "0.0"
+    t.decimal "total_additions", default: "0.0"
     t.index ["employee_id"], name: "index_employee_ytd_totals_on_employee_id"
   end
 

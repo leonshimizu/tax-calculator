@@ -2,7 +2,6 @@
 class EmployeesController < ApplicationController
   before_action :set_company
   before_action :set_employee, only: [:show, :update, :destroy, :ytd_totals]
-  # Skip setting a specific employee, as this is a collection route
   skip_before_action :set_employee, only: [:ytd_totals]
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
 
@@ -41,7 +40,7 @@ class EmployeesController < ApplicationController
   end
 
   def ytd_totals
-    if params[:id] # If there's an employee_id in the request, fetch YTD totals for a specific employee
+    if params[:id]
       employee = @company.employees.find(params[:id])
       employee.calculate_ytd_totals(params[:year].to_i)
       employee_ytd_totals = employee.employee_ytd_totals.find_by(year: params[:year])
@@ -59,12 +58,15 @@ class EmployeesController < ApplicationController
         retirement_payment: employee_ytd_totals&.retirement_payment || 0,
         roth_retirement_payment: employee_ytd_totals&.roth_retirement_payment || 0,
         bonus: employee_ytd_totals&.bonus || 0,
-        total_deductions: employee_ytd_totals&.total_deductions || 0
+        total_deductions: employee_ytd_totals&.total_deductions || 0,
+        reported_tips: employee_ytd_totals&.reported_tips || 0,
+        loan_payment: employee_ytd_totals&.loan_payment || 0,
+        insurance_payment: employee_ytd_totals&.insurance_payment || 0,
+        total_additions: employee_ytd_totals&.total_additions || 0
       }
   
       render json: employee_data
     else
-      # Fetch YTD totals for all employees
       @employees = @company.employees.map do |employee|
         employee.calculate_ytd_totals(params[:year].to_i)
         employee_ytd_totals = employee.employee_ytd_totals.find_by(year: params[:year])
@@ -82,7 +84,11 @@ class EmployeesController < ApplicationController
           retirement_payment: employee_ytd_totals&.retirement_payment || 0,
           roth_retirement_payment: employee_ytd_totals&.roth_retirement_payment || 0,
           bonus: employee_ytd_totals&.bonus || 0,
-          total_deductions: employee_ytd_totals&.total_deductions || 0
+          total_deductions: employee_ytd_totals&.total_deductions || 0,
+          reported_tips: employee_ytd_totals&.reported_tips || 0,
+          loan_payment: employee_ytd_totals&.loan_payment || 0,
+          insurance_payment: employee_ytd_totals&.insurance_payment || 0,
+          total_additions: employee_ytd_totals&.total_additions || 0
         }
       end
   

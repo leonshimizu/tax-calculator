@@ -127,12 +127,13 @@ Make sure you have the following installed on your machine:
 
 This application is automatically deployed to Render when commits are pushed to the main branch.
 
-- **Backend** is hosted at [tax-calculator-frontend.netlify.app/](https://tax-calculator-frontend.netlify.app/).
-- **Frontend** is hosted at [app.netlify.com/sites/tax-calculator-frontend/overview](https://app.netlify.com/sites/tax-calculator-frontend/overview).
-- **Database** is hosted at [Render PostgreSQL Dashboard](https://dashboard.render.com/d/dpg-cr1ceq23esus73at4vtg-a/info).
+- **Backend** is hosted on [Render](https://dashboard.render.com/web/srv-cr1ektrqf0us73fm9rh0).
+- **Frontend** is hosted on [Netlify](https://app.netlify.com/sites/tax-calculator-frontend/overview).
+- **Database** is hosted on [Render](https://dashboard.render.com/d/dpg-cr1ceq23esus73at4vtg-a/info).
 
 ## Additional Information
 
 - **Frontend Code Repository**: [GitHub Repository](https://github.com/leonshimizu/tax-calculator-frontend)
 - **Frontend Hosting**: Due to the issues in how Render handles single page applications, we had to move it to Netlify.
 - **Automatic Deployments**: Changes pushed to the main branch are automatically deployed online.
+- **Live Link**: https://tax-calculator-frontend.netlify.app/

@@ -10,6 +10,7 @@ This repository contains the backend for the Tax Calculator application, which i
   - [Ruby Setup](#ruby-setup)
   - [Rails Setup](#rails-setup)
 - [Running the Application](#running-the-application)
+- [Signup Process](#signup-process)
 - [Deployment](#deployment)
 - [Additional Information](#additional-information)
 
@@ -123,6 +124,21 @@ Make sure you have the following installed on your machine:
 
    Open your browser and navigate to `http://localhost:3000`.
 
+## Signup Process
+
+The Tax Calculator application allows anyone to create an account through the signup page. However, new accounts require approval before users can log in:
+
+1. After signing up, the user's status is set to "pending."
+2. **Admin Approval**: An admin must approve the account by updating the user's status to "approved" via the admin dashboard.
+3. Alternatively, you can manually approve the user via the Rails console:
+
+   ```ruby
+   user = User.find_by(email: "user@example.com")
+   user.update(status: "approved")
+   ```
+
+Once approved, users can log in and access the application.
+
 ## Deployment
 
 This application is automatically deployed to Render when commits are pushed to the main branch.
@@ -134,6 +150,6 @@ This application is automatically deployed to Render when commits are pushed to 
 ## Additional Information
 
 - **Frontend Code Repository**: [GitHub Repository](https://github.com/leonshimizu/tax-calculator-frontend)
-- **Frontend Hosting**: Due to the issues in how Render handles single page applications, we had to move it to Netlify.
+- **Frontend Hosting**: Due to issues in how Render handles single-page applications, we moved the frontend to Netlify.
 - **Automatic Deployments**: Changes pushed to the main branch are automatically deployed online.
 - **Live Link**: https://tax-calculator-frontend.netlify.app/
